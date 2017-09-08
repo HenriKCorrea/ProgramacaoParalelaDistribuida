@@ -8,9 +8,10 @@
 //Public methods
 //////////////////////////////////////////////////////////////////////////
 
+//Read "argv" in index "commandIndex" and, if is a valid command, extract its correspondent enum "operation_type"
 operation_type argParser_GetCommand(int commandIndex, char ** argv)
 {
-	operation_type resultCommand = INVALID; //command variable to be returned to the user.
+	operation_type resultCommand = INVALID_op; //command variable to be returned to the user.
 
 	//Convert command to uppercase
 	char argvCommandUpperCase[30] = {""};
@@ -32,6 +33,43 @@ operation_type argParser_GetCommand(int commandIndex, char ** argv)
 	}
 
 	return resultCommand;
+}
+
+
+unsigned int argParser_ExtractOptArgsFlag(int argc, char** argv)
+{
+	unsigned int resultOptArgsFlags = INVALID_opAr; //command variable to be returned to the user.
+
+	for (int i = 1; i < argc + 1; ++i)
+	{
+		for (int j = 0; j < numOfOptionalArguments + 1; ++j)
+		{
+			if ((strcmp(argv[i], m_argParser_optArgsShort[j]) == 0) ||
+				(strcmp(argv[i], m_argParser_optArgsLong[j]) == 0))
+			{
+				//If command match, set enum and exit loop.
+				resultOptArgsFlags |= (1 << j);
+				break;
+			}
+		}
+
+	}
+
+	return 0;
+}
+
+//Get element index
+//f
+
+int getEnumTableIndex(optionalArgs_type enumOptArg)
+{
+	unsigned int enumValue = enumOptArg;
+	int i = 0;
+	for (i; enumValue != 0; ++i)
+	{
+		enumValue >> 1;
+	}
+	return i;
 }
 
 
