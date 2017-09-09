@@ -26,15 +26,24 @@ static const char* m_argParser_commandList[] = {
 //number of command types
 static const int numOfOperations = 5;
 
-//Optional arguments described in enum form to be processed as flags.
+////Optional arguments described in enum form to be processed as flags.
+//typedef enum optionalArgs_type {
+//	INVALID_opAr = 0,
+//	NAME = 1,
+//	CPF = 2,
+//	BALANCE = 4,
+//	PASSWORD = 8,
+//	ACCOUNT_ID = 16,
+//	AGENCY_ID = 32} optionalArgs_type;
+
 typedef enum optionalArgs_type {
 	INVALID_opAr = 0,
-	NAME = 1,
-	CPF = 2,
-	BALANCE = 4,
-	PASSWORD = 8,
-	ACCOUNT_ID = 16,
-	AGENCY_ID = 32} optionalArgs_type;
+	NAME,
+	CPF,
+	BALANCE,
+	PASSWORD,
+	ACCOUNT_ID,
+	AGENCY_ID} optionalArgs_type;
 
 static const int numOfOptionalArguments = 6;
 
@@ -85,6 +94,8 @@ static const char *m_argParser_optArgsLong[] = {
 operation_type argParser_GetCommand(int commandIndex, char** argv);
 
 unsigned int argParser_ExtractOptArgsFlag(int argc, char** argv);
+
+unsigned int argParser_GetOpArgIndex(int* argIndex, int argc, char** argv, optionalArgs_type enmOptArg);
 
 //////////////////////////////////////////////////////////////////////////
 //Auxiliary public methods

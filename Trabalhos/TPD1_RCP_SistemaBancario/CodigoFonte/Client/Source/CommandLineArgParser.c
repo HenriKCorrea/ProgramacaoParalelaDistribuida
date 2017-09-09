@@ -36,40 +36,58 @@ operation_type argParser_GetCommand(int commandIndex, char ** argv)
 }
 
 
-unsigned int argParser_ExtractOptArgsFlag(int argc, char** argv)
-{
-	unsigned int resultOptArgsFlags = INVALID_opAr; //command variable to be returned to the user.
-
-	for (int i = 1; i < argc + 1; ++i)
-	{
-		for (int j = 0; j < numOfOptionalArguments + 1; ++j)
-		{
-			if ((strcmp(argv[i], m_argParser_optArgsShort[j]) == 0) ||
-				(strcmp(argv[i], m_argParser_optArgsLong[j]) == 0))
-			{
-				//If command match, set enum and exit loop.
-				resultOptArgsFlags |= (1 << j);
-				break;
-			}
-		}
-
-	}
-
-	return 0;
-}
+//unsigned int argParser_ExtractOptArgsFlag(int argc, char** argv)
+//{
+//	unsigned int resultOptArgsFlags = INVALID_opAr; //command variable to be returned to the user.
+//
+//	for (int i = 1; i < argc + 1; ++i)
+//	{
+//		for (int j = 0; j < numOfOptionalArguments + 1; ++j)
+//		{
+//			if ((strcmp(argv[i], m_argParser_optArgsShort[j]) == 0) ||
+//				(strcmp(argv[i], m_argParser_optArgsLong[j]) == 0))
+//			{
+//				//If command match, set enum and exit loop.
+//				resultOptArgsFlags |= (1 << j);
+//				break;
+//			}
+//		}
+//
+//	}
+//
+//	return 0;
+//}
 
 //Get element index
 //f
 
-int getEnumTableIndex(optionalArgs_type enumOptArg)
+//int getEnumTableIndex(optionalArgs_type enumOptArg)
+//{
+//	unsigned int enumValue = enumOptArg;
+//	int i = 0;
+//	for (i; enumValue != 0; ++i)
+//	{
+//		enumValue = 1;
+//	}
+//	return i;
+//}
+
+unsigned int argParser_GetOpArgIndex(int* argIndex, int argc, char** argv, optionalArgs_type enmOptArg)
 {
-	unsigned int enumValue = enumOptArg;
-	int i = 0;
-	for (i; enumValue != 0; ++i)
+	unsigned int operationResult = 0; //false
+	int optArgTableIndex = enmOptArg;
+	for (int i = 1; i < argc; ++i)
 	{
-		enumValue >> 1;
+		if ((strcmp(argv[i], m_argParser_optArgsShort[optArgTableIndex]) == 0) ||
+			(strcmp(argv[i], m_argParser_optArgsLong[optArgTableIndex]) == 0))
+		{
+			//If command match, set index, set flag to true and break loop
+			*argIndex = i;
+			operationResult = 1;
+			break;
+		}
 	}
-	return i;
+	return operationResult;
 }
 
 

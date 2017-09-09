@@ -1,9 +1,13 @@
 #include <stdio.h>
 #include "CommandLineArgParser.h"
+#include "commonDefinitions.h"
+
+
+
+
 
 int main(int argc, char** argv)
 {
-
 	operation_type command = INVALID_op;
 	command = argParser_GetCommand(1, argv);
 
@@ -13,17 +17,32 @@ int main(int argc, char** argv)
 		{
 			case CREATE_ACCOUNT:
 			{
-				//Declare account struct
-				// account newClientAccount
+				Account newClientAccount;
 				
-
-				if (argv == 2) //Print to the user a form to get the necessary data.
+				if (argc == 2) //Print to the user a form to get the necessary data.
 				{
 				}
 				else //Extract command line optional arguments
 				{
 					unsigned int dataExtractedSuccessfully = 1; //true
-					// dataExtractedSuccessfully &= argParser_GetOpArgIndex(argIndex, argc, argv, NAME);
+
+					int nameArgIndex = 0;
+					dataExtractedSuccessfully &= argParser_GetOpArgIndex(&nameArgIndex, argc, argv, NAME);
+
+					int cpfArgIndex = 0;
+					dataExtractedSuccessfully &= argParser_GetOpArgIndex(&cpfArgIndex, argc, argv, CPF);
+
+					int balanceArgIndex = 0;
+					dataExtractedSuccessfully &= argParser_GetOpArgIndex(&balanceArgIndex, argc, argv, BALANCE);
+
+					int passwordArgIndex = 0;
+					dataExtractedSuccessfully &= argParser_GetOpArgIndex(&passwordArgIndex, argc, argv, PASSWORD);
+
+					if (dataExtractedSuccessfully == 1)
+					{
+						dataExtractedSuccessfully = 0;
+					}
+
 					//if(dataExtractedSuccessfully) strcpy(newClientAccount.name, argv[argIndex], strlen
 
 					// dataExtractedSuccessfully &= argParser_GetOpArgIndex(argIndex, argc, argv, CPF)
@@ -33,8 +52,6 @@ int main(int argc, char** argv)
 					//setAccountField(account newClientAccount, NAME, char* argv, argvMinSize, argvMaxSize);
 					//IsStringSizeInLimits(char* argv, argvMinSize, argvMaxSize)
 
-					//TODO tentar criar biblioteca estatica com definição de estruturas globais.
-					//Se não for bem sucedido, tentar incluir o .h como dependencia externa
 
 				}
 				
@@ -53,3 +70,4 @@ int main(int argc, char** argv)
 
 
 }
+
