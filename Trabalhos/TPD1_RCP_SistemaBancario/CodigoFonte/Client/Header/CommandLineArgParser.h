@@ -104,6 +104,8 @@ unsigned int argParser_GetOpArgIndex(int* argIndex, int argc, char** argv, optio
 //Convert "sourceString" to upper case and save in address "targetString
 void stringToUpper(char* targetString, const char* sourceString, size_t size);
 
+int extractStringDigits(char* targetString, const char* sourceString);
+
 //////////////////////////////////////////////////////////////////////////
 //Private methods
 //////////////////////////////////////////////////////////////////////////

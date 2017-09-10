@@ -102,3 +102,22 @@ void stringToUpper(char* targetString, const char* sourceString, size_t size)
 		targetString[i] = toupper(sourceString[i]);
 	}
 }
+
+int extractStringDigits(char* targetString, const char* sourceString)
+{
+	size_t sourceSize = strlen(sourceString);
+	int targetIndex = 0;
+	for (int i = 0; i < sourceSize; ++i)
+	{
+		if (isdigit(sourceString[i]))
+		{
+			if (targetString != NULL)
+			{
+				targetString[targetIndex] = sourceString[i];
+			}
+			
+			++targetIndex;
+		}
+	}
+	return targetIndex;
+}

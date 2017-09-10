@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "CommandLineArgParser.h"
 #include "commonDefinitions.h"
+#include "Client.h"
 
 
 
@@ -10,6 +11,7 @@ int main(int argc, char** argv)
 {
 	operation_type command = INVALID_op;
 	command = argParser_GetCommand(1, argv);
+	  
 
 	if (command != INVALID_op)
 	{
@@ -40,7 +42,11 @@ int main(int argc, char** argv)
 
 					if (dataExtractedSuccessfully == 1)
 					{
-						dataExtractedSuccessfully = 0;
+						client_error_type opResult = client_SetNewClientAccount(&newClientAccount,
+														argv[nameArgIndex + 1],
+														argv[cpfArgIndex + 1],
+														argv[balanceArgIndex + 1],
+														argv[passwordArgIndex + 1]);
 					}
 
 					//if(dataExtractedSuccessfully) strcpy(newClientAccount.name, argv[argIndex], strlen
