@@ -120,7 +120,7 @@ client_error_type client_SetPassword(Account* clientAccount, const char* argv)
 	else
 	{
 		int numOfDigitsExtracted = extractStringDigits(NULL, argv);
-		if (numOfDigitsExtracted != argv_len)
+		if (numOfDigitsExtracted != ACC_PASSWORD_LENGHT)
 		{
 			opResult = CLIENT_PASSOWRD_INVALID_DIGIT;
 		}
@@ -179,7 +179,7 @@ int isBalanceValid(double balanceValue)
 	double remainingDecimal = modf(balanceValue * 100, &dummyValue);
 
 	int result = 1;
-	if (remainingDecimal > 0)
+	if (remainingDecimal > 1e-10 /* Maximum tolerance */)
 	{
 		//Balance is invalid, have more than two decimals digits.
 		result = 0;
