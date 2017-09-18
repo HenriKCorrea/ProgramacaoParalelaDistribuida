@@ -1,7 +1,8 @@
 #ifndef Client_h__
 #define Client_h__
 
-#include "commonDefinitions.h"
+#include "../../CommonDependencies/commonDefinitions.h"
+#include "../../CommonDependencies/RPCBank.h"
 #include "CommandLineArgParser.h"
 
 /************************************************************************/
@@ -25,7 +26,7 @@ typedef enum client_error_type
 /* Public methods														*/
 /************************************************************************/
 
-client_error_type client_SetNewClientAccount(Account* clientAccount, const char* cName, const char* cCPF, const char* cBalance, const char* cPassword);
+client_error_type client_SetNewClientAccount(Account* clientAccount, const char* cName, const char* cCPF, const char* cBalance);
 
 client_error_type client_SetName(Account* clientAccount, const char* argv);
 

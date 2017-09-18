@@ -1,4 +1,4 @@
-#include "CommandLineArgParser.h"
+#include "../Header/CommandLineArgParser.h"
 
 #include <string.h>
 #include <ctype.h>
@@ -11,7 +11,7 @@
 //Read "argv" in index "commandIndex" and, if is a valid command, extract its correspondent enum "operation_type"
 operation_type argParser_GetCommand(int commandIndex, char ** argv)
 {
-	operation_type resultCommand = INVALID_op; //command variable to be returned to the user.
+	operation_type resultCommand = OP_T_INVALID; //command variable to be returned to the user.
 
 	//Convert command to uppercase
 	char argvCommandUpperCase[30] = {""};

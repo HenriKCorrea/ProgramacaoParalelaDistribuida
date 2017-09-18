@@ -1,6 +1,7 @@
-#include "Client.h"
+#include "../Header/Client.h"
 
-#include "CommandLineArgParser.h"
+#include "../Header/CommandLineArgParser.h"
+#include "../../CommonDependencies/RPCBank.h"
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
@@ -10,7 +11,7 @@
 /* Public methods														*/
 /************************************************************************/
 
-client_error_type client_SetNewClientAccount(Account* clientAccount, const char* cName, const char* cCPF, const char* cBalance, const char* cPassword)
+client_error_type client_SetNewClientAccount(Account* clientAccount, const char* cName, const char* cCPF, const char* cBalance)
 {
 	client_error_type opResult = CLIENT_SUCCESS;
 	int i = 0;
@@ -33,17 +34,12 @@ client_error_type client_SetNewClientAccount(Account* clientAccount, const char*
 			opResult = client_SetBalance(clientAccount, cBalance);
 			break;
 		}
-		case 3:
-		{
-			opResult = client_SetPassword(clientAccount, cPassword);
-			break;
-		}
 		default:
 			//FAIL
 			break;
 		}
 		++i;
-	} while ((opResult == CLIENT_SUCCESS) && (i < 4));
+	} while ((opResult == CLIENT_SUCCESS) && (i < 3));
 
 	return opResult;
 }
@@ -97,7 +93,7 @@ client_error_type client_SetBalance(Account* clientAccount, const char* argv)
 	double extractedBalance = strtod(argv, NULL);
 	if (isBalanceValid(extractedBalance) == 0)
 	{
-		//TODO mudar precisão de validade para se mais flexivel
+		//TODO mudar precisï¿½o de validade para se mais flexivel
 		opResult = CLIENT_BALANCE_DECIMAL_OVERFLOW;
 	} 
 	else
@@ -108,30 +104,30 @@ client_error_type client_SetBalance(Account* clientAccount, const char* argv)
 	return opResult;
 }
 
-client_error_type client_SetPassword(Account* clientAccount, const char* argv)
-{
-	client_error_type opResult = CLIENT_SUCCESS;
+// client_error_type client_SetPassword(Account* clientAccount, const char* argv)
+// {
+// 	client_error_type opResult = CLIENT_SUCCESS;
 
-	size_t argv_len = strlen(argv);
-	if (argv_len > (ACC_PASSWORD_LENGHT))
-	{
-		opResult = CLIENT_PASSOWRD_SIZE_OVERFLOW;
-	}
-	else
-	{
-		int numOfDigitsExtracted = extractStringDigits(NULL, argv);
-		if (numOfDigitsExtracted != ACC_PASSWORD_LENGHT)
-		{
-			opResult = CLIENT_PASSOWRD_INVALID_DIGIT;
-		}
-		else
-		{
-			clientAccount->password = strtoul(argv, NULL, 10);
-		}
-	}
+// 	size_t argv_len = strlen(argv);
+// 	if (argv_len > (ACC_PASSWORD_LENGHT))
+// 	{
+// 		opResult = CLIENT_PASSOWRD_SIZE_OVERFLOW;
+// 	}
+// 	else
+// 	{
+// 		int numOfDigitsExtracted = extractStringDigits(NULL, argv);
+// 		if (numOfDigitsExtracted != ACC_PASSWORD_LENGHT)
+// 		{
+// 			opResult = CLIENT_PASSOWRD_INVALID_DIGIT;
+// 		}
+// 		else
+// 		{
+// 			clientAccount->password = strtoul(argv, NULL, 10);
+// 		}
+// 	}
 
-	return opResult;
-}
+// 	return opResult;
+// }
 
 client_error_type client_SetAccountNumber(Account* clientAccount, const char* argv)
 {
@@ -151,23 +147,7 @@ client_error_type client_SetAccountNumber(Account* clientAccount, const char* ar
 	return opResult;
 }
 
-client_error_type client_SetAgencyNumber(Account* clientAccount, const char* argv)
-{
-	client_error_type opResult = CLIENT_SUCCESS;
 
-	int numOfDigitsExtracted = extractStringDigits(NULL, argv);
-	size_t argv_len = strlen(argv);
-	if (numOfDigitsExtracted != argv_len)
-	{
-		opResult = CLIENT_AGENCYNUM_INVALID_DIGIT;
-	}
-	else
-	{
-		clientAccount->agencyID = strtoul(argv, NULL, 10);
-	}
-
-	return opResult;
-}
 
 /************************************************************************/
 /* Auxiliary public methods                                             */

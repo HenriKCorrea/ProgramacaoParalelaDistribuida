@@ -1,18 +1,20 @@
 #ifndef CommandLineArgParser_h__
 #define CommandLineArgParser_h__
 
+#include<stddef.h>
+
 //////////////////////////////////////////////////////////////////////////
 //Global constants
 //////////////////////////////////////////////////////////////////////////
 
 //System operations available for the client
 typedef enum operation_type {
-	INVALID_op = 0,
-	CREATE_ACCOUNT, 
-	DELETE_ACCOUNT, 
-	AUTHENTICATE_ACCOUNT,
-	DEPOSIT,
-	WITHDRAW} operation_type;
+	OP_T_INVALID = 0,
+	OP_T_CREATE_ACCOUNT, 
+	OP_T_DELETE_ACCOUNT, 
+	OP_T_AUTHENTICATE_ACCOUNT,
+	OP_T_DEPOSIT,
+	OP_T_WITHDRAW} operation_type;
 
 //Command names to identify console arguments
 static const char* m_argParser_commandList[] = {
@@ -37,33 +39,27 @@ static const int numOfOperations = 5;
 //	AGENCY_ID = 32} optionalArgs_type;
 
 typedef enum optionalArgs_type {
-	INVALID_opAr = 0,
-	NAME,
-	CPF,
-	BALANCE,
-	PASSWORD,
-	ACCOUNT_ID,
-	AGENCY_ID} optionalArgs_type;
+	OP_AR_INVALID = 0,
+	OP_AR_NAME,
+	OP_AR_CPF,
+	OP_AR_BALANCE,
+	OP_AR_ACCOUNT_ID} optionalArgs_type;
 
-static const int numOfOptionalArguments = 6;
+static const int numOfOptionalArguments = 4;
 
 static const char *m_argParser_optArgsShort[] = {
 	"",
 	"-n",
 	"-c",
 	"-s",
-	"-p",
-	"-nc",
-	"-na"};
+	"-nc"};
 
 static const char *m_argParser_optArgsLong[] = {
 	"",
 	"--nome",
 	"--cpf",
 	"--saldo",
-	"--senha",
-	"--numero-conta",
-	"--numero-agencia"};
+	"--numero-conta"};
 
 
 /************************************************************************/
@@ -89,7 +85,7 @@ static const char *m_argParser_optArgsLong[] = {
 * @retavl INVALID			If command is not located in 
 *							"m_argParser_commandList"
 *
-* @author Henrique Krausburg Corrêa
+* @author Henrique Krausburg Corrï¿½a
 */
 operation_type argParser_GetCommand(int commandIndex, char** argv);
 

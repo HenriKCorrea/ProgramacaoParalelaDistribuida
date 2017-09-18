@@ -1,24 +1,24 @@
 #include <stdio.h>
-#include "CommandLineArgParser.h"
-#include "commonDefinitions.h"
-#include "Client.h"
-
-
+#include "../Header/CommandLineArgParser.h"
+#include "../Header/Client.h"
+#include "../../CommonDependencies/commonDefinitions.h"
+#include "../../CommonDependencies/RPCBank.h"
 
 
 
 int main(int argc, char** argv)
 {
-	operation_type command = INVALID_op;
+	operation_type command = OP_T_INVALID;
 	command = argParser_GetCommand(1, argv);
 	  
 
-	if (command != INVALID_op)
+	if (command != OP_T_INVALID)
 	{
 		switch (command)
 		{
-			case CREATE_ACCOUNT:
+			case OP_T_CREATE_ACCOUNT:
 			{
+				//Account *newClientAccount = (Account *) malloc(sizeof(Account));
 				Account newClientAccount;
 				
 				if (argc == 2) //Print to the user a form to get the necessary data.
@@ -29,24 +29,31 @@ int main(int argc, char** argv)
 					unsigned int dataExtractedSuccessfully = 1; //true
 
 					int nameArgIndex = 0;
-					dataExtractedSuccessfully &= argParser_GetOpArgIndex(&nameArgIndex, argc, argv, NAME);
+					dataExtractedSuccessfully &= argParser_GetOpArgIndex(&nameArgIndex, argc, argv, OP_AR_NAME);
 
 					int cpfArgIndex = 0;
-					dataExtractedSuccessfully &= argParser_GetOpArgIndex(&cpfArgIndex, argc, argv, CPF);
+					dataExtractedSuccessfully &= argParser_GetOpArgIndex(&cpfArgIndex, argc, argv, OP_AR_CPF);
 
 					int balanceArgIndex = 0;
-					dataExtractedSuccessfully &= argParser_GetOpArgIndex(&balanceArgIndex, argc, argv, BALANCE);
-
-					int passwordArgIndex = 0;
-					dataExtractedSuccessfully &= argParser_GetOpArgIndex(&passwordArgIndex, argc, argv, PASSWORD);
+					dataExtractedSuccessfully &= argParser_GetOpArgIndex(&balanceArgIndex, argc, argv, OP_AR_BALANCE);
 
 					if (dataExtractedSuccessfully == 1)
 					{
 						client_error_type opResult = client_SetNewClientAccount(&newClientAccount,
 														argv[nameArgIndex + 1],
 														argv[cpfArgIndex + 1],
-														argv[balanceArgIndex + 1],
-														argv[passwordArgIndex + 1]);
+														argv[balanceArgIndex + 1]);
+
+
+						//TODO chamar RPC
+						CLIENT *cl;
+						if (!(cl = clnt_create(argv[2], RPCBANK_PROGRAM, RPCBANK_VERS,"tcp"))) {
+							clnt_pcreateerror(argv[2]);
+							exit(1);
+							}
+						unsigned int answer = *create_account_1(&newClientAccount,cl);
+						printf("Resultado criar conta: %d\n", answer);
+						
 					}
 
 					//if(dataExtractedSuccessfully) strcpy(newClientAccount.name, argv[argIndex], strlen
