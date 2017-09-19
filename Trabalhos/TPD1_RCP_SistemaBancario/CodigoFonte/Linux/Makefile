@@ -1,41 +1,62 @@
+COM_DIR := CommonDependencies/
+CLI_DIR := Client/Source/
+ADM_DIR := Administracao/Source/
+
+
 all: client server
 
-addit.h: addit.x
-	rpcgen addit.x
+RPCBank.h:
+	cd CommonDependencies; rpcgen RPCBank.x
 
-#addit_svc.c addit_clnt.c addit_xdr.c add_cli.c add_svc.c: addit.h
+#RPCBank_svc.c RPCBank_clnt.c RPCBank_xdr.c add_cli.c add_svc.c: RPCBank.h
 
-client: add_cli.o addit_clnt.o addit_xdr.o
-	cc -o client add_cli.o addit_clnt.o addit_xdr.o -lnsl
+client: RPCBank_clnt.o RPCBank_xdr.o CommandLineArgParser.o Client.o main_client.o
+	gcc -o client $(CLI_DIR)main.o
 
-server: add_svc.o addit_svc.o addit_xdr.o
-	cc -o server add_svc.o addit_svc.o addit_xdr.o -lnsl
+server: RPCBank_svc.o RPCBank_xdr.o
+#	cc -o server add_svc.o RPCBank_svc.o RPCBank_xdr.o -lnsl
+	
 
-addit_svc.o: addit.h	
-	gcc -g -c addit_svc.c
+RPCBank_svc.o: RPCBank.h	
+	gcc -g -c $(COM_DIR)RPCBank_svc.c -o $(COM_DIR)$@
 
-addit_clnt.o: addit.h
-	gcc -g -c addit_clnt.c
+RPCBank_clnt.o: RPCBank.h
+	gcc -g -c $(COM_DIR)RPCBank_clnt.c -o $(COM_DIR)$@
 
-addit_xdr.o: addit.h 
-	gcc -g -c addit_xdr.c
+RPCBank_xdr.o: RPCBank.h 
+	gcc -g -c $(COM_DIR)RPCBank_xdr.c -o $(COM_DIR)$@
 
-add_cli.o: addit.h 
-	gcc -g -c add_cli.c
+CommandLineArgParser.o:
+	gcc -g -c $(CLI_DIR)CommandLineArgParser.c -o $(CLI_DIR)$@
 
-add_svc.o: addit.h 
-	gcc -g -c add_svc.c
+Client.o: CommandLineArgParser.o RPCBank.h
+	gcc -g -c $(CLI_DIR)Client.c -o $(CLI_DIR)$@
+
+main_client.o: Client.o CommandLineArgParser.o
+	gcc -g -c $(CLI_DIR)main.c -o $(CLI_DIR)main.o
+
+#include "../Header/CommandLineArgParser.h"
+#include "../Header/Client.h"
+#include "../../CommonDependencies/commonDefinitions.h"
+#include "../../CommonDependencies/RPCBank.h"
+
+
+#add_cli.o: RPCBank.h 
+#	gcc -g -c $(COM_DIR)add_cli.c -o $(COM_DIR)$@
+#
+#add_svc.o: RPCBank.h 
+#	gcc -g -c add_svc.c
 
 .PHONY: clean
 
 clean:
-	-rm *.o
 	-rm client
-	-rm server
-	-rm addit.h
-	-rm addit_clnt.c
-	-rm addit_svc.c
-	-rm addit_xdr.c
+	-rm *.o
+	-rm $(COM_DIR)*.o
+	-rm $(CLI_DIR)*.o
+	-rm $(ADM_DIR)*.o
+	-rm $(COM_DIR)RPCBank.h
+	-rm $(COM_DIR)RPCBank_*
 
 #Comandos CommonDependencies
 #henrique@henrique-Inspiron-7520:~/Repositories/ProgramacaoParalelaDistribuida/Trabalhos/TPD1_RCP_SistemaBancario/CodigoFonte/Linux/CommonDependencies$ gcc -g -c RPCBank_xdr.c
