@@ -13,8 +13,8 @@ RPCBank.h:
 client: RPCBank_clnt.o RPCBank_xdr.o CommandLineArgParser.o Client.o main_client.o commonDefinitions.o
 	gcc -o client $(CLI_DIR)main.o $(CLI_DIR)Client.o $(CLI_DIR)CommandLineArgParser.o $(COM_DIR)RPCBank_xdr.o $(COM_DIR)RPCBank_clnt.o  $(COM_DIR)commonDefinitions.o
 
-server: RPCBank_svc.o RPCBank_xdr.o main_server.o commonDefinitions.o
-	gcc -o server $(ADM_DIR)main.o $(COM_DIR)RPCBank_xdr.o $(COM_DIR)RPCBank_svc.o $(COM_DIR)commonDefinitions.o
+server: RPCBank_svc.o RPCBank_xdr.o main_server.o commonDefinitions.o Administracao.o
+	gcc -o server $(ADM_DIR)main.o $(ADM_DIR)Administracao.o $(COM_DIR)RPCBank_xdr.o $(COM_DIR)RPCBank_svc.o $(COM_DIR)commonDefinitions.o
 	
 RPCBank_svc.o: RPCBank.h	
 	gcc -g -O0 -c $(COM_DIR)RPCBank_svc.c -o $(COM_DIR)$@
@@ -39,6 +39,11 @@ main_server.o: RPCBank.h
 
 commonDefinitions.o:
 	gcc -g -O0 -c $(COM_DIR)commonDefinitions.c -o $(COM_DIR)$@
+
+Administracao.o: commonDefinitions.o
+	gcc -g -O0 -c $(ADM_DIR)Administracao.c -o $(ADM_DIR)$@
+
+
 
 #include "../Header/CommandLineArgParser.h"
 #include "../Header/Client.h"

@@ -80,13 +80,8 @@ client_error_type client_SetCPF(Account* clientAccount, const char* argv)
 		} 
 		else
 		{
-			//clientAccount->CPF[0] = strtoul(tmpCPFBuffer, NULL, 10);
 			unsigned long tmpCPF = strtoul(tmpCPFBuffer, NULL, 10);
 			lCPFtoi(clientAccount->CPF, &tmpCPF);
-			//clientAccount->CPF[0] = strtoul(tmpCPFBuffer, NULL, 10);
-			//clientAccount->CPF[0] = tmpCPF & 0x0ffffffff;
-			//clientAccount->CPF[1] = (tmpCPF >> 32) & 0x0ffffffff;
-			//memset(clientAccount->CPF, 0, sizeof(clientAccount->CPF));
 		}
 	}
 	return opResult;
@@ -111,30 +106,6 @@ client_error_type client_SetBalance(Account* clientAccount, const char* argv)
 	return opResult;
 }
 
-// client_error_type client_SetPassword(Account* clientAccount, const char* argv)
-// {
-// 	client_error_type opResult = CLIENT_SUCCESS;
-
-// 	size_t argv_len = strlen(argv);
-// 	if (argv_len > (ACC_PASSWORD_LENGHT))
-// 	{
-// 		opResult = CLIENT_PASSOWRD_SIZE_OVERFLOW;
-// 	}
-// 	else
-// 	{
-// 		int numOfDigitsExtracted = extractStringDigits(NULL, argv);
-// 		if (numOfDigitsExtracted != ACC_PASSWORD_LENGHT)
-// 		{
-// 			opResult = CLIENT_PASSOWRD_INVALID_DIGIT;
-// 		}
-// 		else
-// 		{
-// 			clientAccount->password = strtoul(argv, NULL, 10);
-// 		}
-// 	}
-
-// 	return opResult;
-// }
 
 client_error_type client_SetAccountNumber(Account* clientAccount, const char* argv)
 {
@@ -154,6 +125,15 @@ client_error_type client_SetAccountNumber(Account* clientAccount, const char* ar
 	return opResult;
 }
 
+int createRPCConnection(CLIENT **client, char* serverIP)
+{
+	int result = 1;
+	if (!(*client = clnt_create(serverIP, RPCBANK_PROGRAM, RPCBANK_VERS,"tcp"))) {
+		result = 0;
+	}
+	return result;
+}
+
 
 
 /************************************************************************/
@@ -162,14 +142,23 @@ client_error_type client_SetAccountNumber(Account* clientAccount, const char* ar
 
 int isBalanceValid(double balanceValue)
 {
-	double dummyValue;
-	double remainingDecimal = modf(balanceValue * 100, &dummyValue);
-
 	int result = 1;
-	if (remainingDecimal > 1e-10 /* Maximum tolerance */)
+	if(balanceValue < 0)
 	{
-		//Balance is invalid, have more than two decimals digits.
+		//negative value
 		result = 0;
 	}
+	else
+	{
+		double dummyValue;
+		double remainingDecimal = modf(balanceValue * 100, &dummyValue);
+	
+		if (remainingDecimal > 1e-10 /* Maximum tolerance */)
+		{
+			//Balance is invalid, have more than two decimals digits.
+			result = 0;
+		}		
+	}	
+	
 	return result;
 }

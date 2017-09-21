@@ -2,6 +2,7 @@
 #include <string.h>
 #include <rpc/rpc.h>
 #include "../../CommonDependencies/RPCBank.h"
+#include "../Header/Administracao.h"
 
 //#include "../../CommonDependencies/commonDefinitions.h"
 #include "commonDefinitions.h"
@@ -13,20 +14,43 @@ Account accDatabase[ACCOUNT_DATABASE_LENGTH];
 static unsigned int accDatabase_Size = 0;
 static unsigned int accDatabase_NextID = 0;
 
+static unsigned int returnCode = 0;
+
 
 unsigned int *create_account_1_svc(Account *newAccount, struct svc_req *req) {
+	admin_error_t result = ADMIN_SUCCESS;	
+	printf("Pedido recebido para criar conta\n");
 
 	//If database is not full, register account ID and store new client data.
 	if(accDatabase_Size < ACCOUNT_DATABASE_LENGTH)
 	{
-		++accDatabase_Size;
-		++accDatabase_NextID;
-		newAccount->accountID = accDatabase_NextID;
-		accDatabase[accDatabase_Size] = *newAccount;
+		unsigned long tmpCPF;
+		iCPFtol(&tmpCPF, newAccount->CPF);
+		if(isCPFUnique(accDatabase, accDatabase_Size, tmpCPF))
+		{
+			++accDatabase_NextID;
+			newAccount->accountID = accDatabase_NextID;
+			accDatabase[accDatabase_Size] = *newAccount;
+			++accDatabase_Size;
+			printf("Conta criada com sucesso!\n");
+		}
+		else
+		{
+			result = ADMIN_CA_CPFNOTEQUAL;
+			printAdminError(result);			
+		}
+
+
+	}
+	else
+	{
+		result = ADMIN_CA_DATABASEFULL;
+		printAdminError(result);
 	}
 
-	//Return account ID
-	return ((unsigned int *) &accDatabase_NextID);
+	//Return error code
+	returnCode = result;
+	return ((unsigned int *) &returnCode);
 }
 
 //TODO

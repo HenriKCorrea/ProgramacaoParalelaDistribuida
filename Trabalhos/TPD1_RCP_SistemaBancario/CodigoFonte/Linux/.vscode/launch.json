@@ -14,7 +14,7 @@
                 "type": "cppdbg",
                 "request": "launch",
                 "program": "${workspaceRoot}/client",
-                "args": ["criarConta", "localhost", "-c", "99999999999", "-n", "Henrique", "-s", "110.63"],
+                "args": ["criarConta", "localhost", "-c", "028.107.160-80", "-n", "Henrique", "-s", "12.33"],
                 "stopAtEntry": false,
                 "cwd": "${workspaceRoot}/",
                 "environment": [],
@@ -27,7 +27,7 @@
                         "ignoreFailures": true
                     }
                 ]
-            }
+            },
             {
                 "name": "BankRPC Launch Server",
                 "type": "cppdbg",

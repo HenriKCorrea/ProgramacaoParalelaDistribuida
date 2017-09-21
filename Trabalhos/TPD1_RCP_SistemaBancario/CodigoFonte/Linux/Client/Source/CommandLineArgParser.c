@@ -14,9 +14,9 @@ operation_type argParser_GetCommand(int commandIndex, char ** argv)
 	operation_type resultCommand = OP_T_INVALID; //command variable to be returned to the user.
 
 	//Convert command to uppercase
-	char argvCommandUpperCase[30] = {""};
+	char argvCommandUpperCase[50] = {""};
 	size_t argvSize = strlen(argv[commandIndex]);
-	if (argvSize < 30)
+	if (argvSize < 50)
 	{
 		stringToUpper(argvCommandUpperCase, argv[commandIndex], argvSize);
 

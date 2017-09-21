@@ -6,7 +6,7 @@
 struct Account
 {
 	unsigned int accountID;
-	char name[30];
+	char name[50];
 	unsigned int CPF[2];		/*Necessary an array because RPC do not support unsigned long 64 bits type */
 	double balance;
 };
