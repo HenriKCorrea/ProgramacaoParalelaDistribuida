@@ -40,6 +40,10 @@ client_error_type client_SetAccountNumber(Account* clientAccount, const char* ar
 
 client_error_type client_SetAgencyNumber(Account* clientAccount, const char* argv);
 
+
+//TO DELETE
+client_error_type client_SetCPFTEST(Account_User* clientAccount, const char* argv);
+
 /************************************************************************/
 /* Auxiliary public methods                                             */
 /************************************************************************/

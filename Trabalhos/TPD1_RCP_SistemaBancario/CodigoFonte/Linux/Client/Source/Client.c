@@ -80,11 +80,19 @@ client_error_type client_SetCPF(Account* clientAccount, const char* argv)
 		} 
 		else
 		{
-			clientAccount->CPF = strtoul(tmpCPFBuffer, NULL, 10);
+			//clientAccount->CPF[0] = strtoul(tmpCPFBuffer, NULL, 10);
+			unsigned long tmpCPF = strtoul(tmpCPFBuffer, NULL, 10);
+			lCPFtoi(clientAccount->CPF, &tmpCPF);
+			//clientAccount->CPF[0] = strtoul(tmpCPFBuffer, NULL, 10);
+			//clientAccount->CPF[0] = tmpCPF & 0x0ffffffff;
+			//clientAccount->CPF[1] = (tmpCPF >> 32) & 0x0ffffffff;
+			//memset(clientAccount->CPF, 0, sizeof(clientAccount->CPF));
 		}
 	}
 	return opResult;
 }
+
+
 
 client_error_type client_SetBalance(Account* clientAccount, const char* argv)
 {
@@ -93,7 +101,6 @@ client_error_type client_SetBalance(Account* clientAccount, const char* argv)
 	double extractedBalance = strtod(argv, NULL);
 	if (isBalanceValid(extractedBalance) == 0)
 	{
-		//TODO mudar precis�o de validade para se mais flexivel
 		opResult = CLIENT_BALANCE_DECIMAL_OVERFLOW;
 	} 
 	else

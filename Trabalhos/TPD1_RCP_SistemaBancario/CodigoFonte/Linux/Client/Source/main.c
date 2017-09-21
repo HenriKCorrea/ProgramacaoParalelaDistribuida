@@ -4,7 +4,8 @@
 #include "../../CommonDependencies/commonDefinitions.h"
 #include "../../CommonDependencies/RPCBank.h"
 
-
+//TODO TESTAR CPF COM 123.456.789-10
+//PROBLEMA NO 123!
 
 int main(int argc, char** argv)
 {
@@ -18,8 +19,9 @@ int main(int argc, char** argv)
 		{
 			case OP_T_CREATE_ACCOUNT:
 			{
-				//Account *newClientAccount = (Account *) malloc(sizeof(Account));
-				Account newClientAccount;
+				Account *newClientAccount = (Account *) malloc(sizeof(Account));
+
+
 				
 				if (argc == 2) //Print to the user a form to get the necessary data.
 				{
@@ -39,10 +41,13 @@ int main(int argc, char** argv)
 
 					if (dataExtractedSuccessfully == 1)
 					{
-						client_error_type opResult = client_SetNewClientAccount(&newClientAccount,
+						client_error_type opResult = client_SetNewClientAccount(newClientAccount,
 														argv[nameArgIndex + 1],
 														argv[cpfArgIndex + 1],
 														argv[balanceArgIndex + 1]);
+
+						//TO DELETE
+						//client_SetCPFTEST(&newClientAccount.Acc_User, argv[cpfArgIndex + 1]);
 
 
 						//TODO chamar RPC
@@ -51,7 +56,7 @@ int main(int argc, char** argv)
 							clnt_pcreateerror(argv[2]);
 							exit(1);
 							}
-						unsigned int answer = *create_account_1(&newClientAccount,cl);
+						unsigned int answer = *create_account_1(newClientAccount,cl);
 						printf("Resultado criar conta: %d\n", answer);
 						
 					}

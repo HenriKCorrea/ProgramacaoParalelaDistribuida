@@ -7,16 +7,32 @@
 #define ACC_CPF_DOT_DASHES 3
 
 
-//#include "RPCBank.h"
+#include "RPCBank.h"
 
-// extern struct Account
-// {
-// 	unsigned int accountID;
-// 	char name[ACC_NAME_LENGHT];
-// 	unsigned long CPF;
-// 	double balance;
-// };
+//typedef Account Account_RPC;
 
+/***************************/
+/* Account definitions     */
+/***************************/
+
+//typedef enum 
+
+
+typedef struct Account_User
+{
+    unsigned int accountID;
+	char name[30];
+	unsigned long CPF;
+	double balance;
+}Account_User;
+
+/***************************/
+/* Public methods          */
+/***************************/
+
+void iCPFtol(unsigned long *lCPF, const unsigned int *iCPF);
+
+void lCPFtoi(unsigned int *iCPF, const unsigned long *lCPF);
 
 
 #endif // commonDefinitions_h__

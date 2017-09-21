@@ -10,32 +10,35 @@ RPCBank.h:
 
 #RPCBank_svc.c RPCBank_clnt.c RPCBank_xdr.c add_cli.c add_svc.c: RPCBank.h
 
-client: RPCBank_clnt.o RPCBank_xdr.o CommandLineArgParser.o Client.o main_client.o
-	gcc -o client $(CLI_DIR)main.o $(CLI_DIR)Client.o $(CLI_DIR)CommandLineArgParser.o $(COM_DIR)RPCBank_xdr.o $(COM_DIR)RPCBank_clnt.o
+client: RPCBank_clnt.o RPCBank_xdr.o CommandLineArgParser.o Client.o main_client.o commonDefinitions.o
+	gcc -o client $(CLI_DIR)main.o $(CLI_DIR)Client.o $(CLI_DIR)CommandLineArgParser.o $(COM_DIR)RPCBank_xdr.o $(COM_DIR)RPCBank_clnt.o  $(COM_DIR)commonDefinitions.o
 
-server: RPCBank_svc.o RPCBank_xdr.o main_server.o
-	gcc -o server $(ADM_DIR)main.o $(COM_DIR)RPCBank_xdr.o $(COM_DIR)RPCBank_svc.o
+server: RPCBank_svc.o RPCBank_xdr.o main_server.o commonDefinitions.o
+	gcc -o server $(ADM_DIR)main.o $(COM_DIR)RPCBank_xdr.o $(COM_DIR)RPCBank_svc.o $(COM_DIR)commonDefinitions.o
 	
 RPCBank_svc.o: RPCBank.h	
-	gcc -g -c $(COM_DIR)RPCBank_svc.c -o $(COM_DIR)$@
+	gcc -g -O0 -c $(COM_DIR)RPCBank_svc.c -o $(COM_DIR)$@
 
 RPCBank_clnt.o: RPCBank.h
-	gcc -g -c $(COM_DIR)RPCBank_clnt.c -o $(COM_DIR)$@
+	gcc -g -O0 -c $(COM_DIR)RPCBank_clnt.c -o $(COM_DIR)$@
 
 RPCBank_xdr.o: RPCBank.h 
-	gcc -g -c $(COM_DIR)RPCBank_xdr.c -o $(COM_DIR)$@
+	gcc -g -O0 -c $(COM_DIR)RPCBank_xdr.c -o $(COM_DIR)$@
 
 CommandLineArgParser.o:
-	gcc -g -c $(CLI_DIR)CommandLineArgParser.c -o $(CLI_DIR)$@
+	gcc -g -O0 -c $(CLI_DIR)CommandLineArgParser.c -o $(CLI_DIR)$@
 
 Client.o: CommandLineArgParser.o RPCBank.h
-	gcc -g -c $(CLI_DIR)Client.c -o $(CLI_DIR)$@
+	gcc -g -O0 -c $(CLI_DIR)Client.c -o $(CLI_DIR)$@
 
 main_client.o: Client.o CommandLineArgParser.o
-	gcc -g -c $(CLI_DIR)main.c -o $(CLI_DIR)main.o
+	gcc -g -O0 -c $(CLI_DIR)main.c -o $(CLI_DIR)main.o
 
 main_server.o: RPCBank.h
-	gcc -g -c $(ADM_DIR)main.c -o $(ADM_DIR)main.o	
+	gcc -g -O0 -c $(ADM_DIR)main.c -I$(COM_DIR) -o $(ADM_DIR)main.o	
+
+commonDefinitions.o:
+	gcc -g -O0 -c $(COM_DIR)commonDefinitions.c -o $(COM_DIR)$@
 
 #include "../Header/CommandLineArgParser.h"
 #include "../Header/Client.h"
