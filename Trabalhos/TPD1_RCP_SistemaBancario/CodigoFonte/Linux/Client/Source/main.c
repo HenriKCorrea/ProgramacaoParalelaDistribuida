@@ -21,59 +21,105 @@ int main(int argc, char** argv)
 				{
 					Account *newClientAccount = (Account *) malloc(sizeof(Account));
 					
-						unsigned int dataExtractedSuccessfully = 1; //true
-	
-						int nameArgIndex = 0;
-						dataExtractedSuccessfully &= argParser_GetOpArgIndex(&nameArgIndex, argc, argv, OP_AR_NAME);
-	
-						int cpfArgIndex = 0;
-						dataExtractedSuccessfully &= argParser_GetOpArgIndex(&cpfArgIndex, argc, argv, OP_AR_CPF);
-	
-						int balanceArgIndex = 0;
-						dataExtractedSuccessfully &= argParser_GetOpArgIndex(&balanceArgIndex, argc, argv, OP_AR_BALANCE);
-	
-						if (dataExtractedSuccessfully == 1)
+					unsigned int dataExtractedSuccessfully = 1; //true
+
+					int nameArgIndex = 0;
+					dataExtractedSuccessfully &= argParser_GetOpArgIndex(&nameArgIndex, argc, argv, OP_AR_NAME);
+
+					int cpfArgIndex = 0;
+					dataExtractedSuccessfully &= argParser_GetOpArgIndex(&cpfArgIndex, argc, argv, OP_AR_CPF);
+
+					int balanceArgIndex = 0;
+					dataExtractedSuccessfully &= argParser_GetOpArgIndex(&balanceArgIndex, argc, argv, OP_AR_BALANCE);
+
+					if (dataExtractedSuccessfully == 1)
+					{
+						client_error_type opResult = client_SetNewClientAccount(newClientAccount,
+														argv[nameArgIndex + 1],
+														argv[cpfArgIndex + 1],
+														argv[balanceArgIndex + 1]);
+						
+						if(opResult == CLIENT_SUCCESS)
 						{
-							client_error_type opResult = client_SetNewClientAccount(newClientAccount,
-															argv[nameArgIndex + 1],
-															argv[cpfArgIndex + 1],
-															argv[balanceArgIndex + 1]);
-							
-							if(opResult == CLIENT_SUCCESS)
+							admin_error_t answer= *create_account_1(newClientAccount,cl);
+							if(answer == ADMIN_SUCCESS)
 							{
-								admin_error_t answer= *create_account_1(newClientAccount,cl);
-								if(answer == ADMIN_SUCCESS)
-								{
-									printf("Operação realizada com sucesso!\n");
-								}
-								else
-								{
-									printAdminError(answer);
-								}
-								
+								printf("Operação realizada com sucesso!\n");
 							}
 							else
 							{
-								fprintf(stderr, "Falha ao processar argumentos do comando %s: ", argv[1]);
-								printClientError(opResult);
+								printAdminError(answer);
 							}
+							
 						}
 						else
 						{
-							fprintf(stderr, "Falha ao extrair argumentos do comando %s.\n", argv[1]);
-							fprintf(stderr, "Uso:\tcriarConta <IP Processo Administrativo> -n <Nome> -c <CPF> -s <Saldo>\n");
+							fprintf(stderr, "Falha ao processar argumentos do comando %s: ", argv[1]);
+							printClientError(opResult);
 						}
+					}
+					else
+					{
+						fprintf(stderr, "Falha ao extrair argumentos do comando %s.\n", argv[1]);
+						fprintf(stderr, "Uso:\tcriarConta <IP Processo Administrativo> -n <Nome> -c <CPF> -s <Saldo>\n");
+					}
 					
 					free(newClientAccount);
 				}
 				break;
-	
+
+				case OP_T_DELETE_ACCOUNT:
+				{
+					//Required argument: CPF
+					unsigned int dataExtractedSuccessfully = 1; //true
+					
+					//Get CPF arg ID
+					int cpfArgIndex = 0;
+					dataExtractedSuccessfully &= argParser_GetOpArgIndex(&cpfArgIndex, argc, argv, OP_AR_CPF);
+					
+					//Check if argument flag has been detected
+					if (dataExtractedSuccessfully == 1)
+					{
+						//Set CPF
+						unsigned long CPF = 0;
+						client_error_type opResult = client_ExtractCPF(CPF, argv[cpfArgIndex + 1]);//TO IMPLEMENT
+						if(opResult == CLIENT_SUCCESS)
+						{
+							//Send command to server
+							admin_error_t answer= *delete_account_1(newClientAccount,cl);	//TO IMPLEMENT
+							if(answer == ADMIN_SUCCESS)
+							{
+								printf("Operação realizada com sucesso!\n");
+							}
+							else
+							{
+								printAdminError(answer);
+							}
+							
+						}
+						else
+						{
+							fprintf(stderr, "Falha ao processar argumentos do comando %s: ", argv[1]);
+							printClientError(opResult);
+						}
+					}
+					else
+					{
+						fprintf(stderr, "Falha ao extrair argumentos do comando %s.\n", argv[1]);
+						fprintf(stderr, "Uso:\tencerrarConta <IP Processo Administrativo> -c <CPF>\n");
+					}					
+				}
+				break;
+
+
 				default:
-				//fail
-				fprintf(stderr, "falha ao processar %s [argumentos].\n", argv[1]);
-				fprintf(stderr, "uso:\t%s <comando> <IP Processo Administrativo> [argumentos]\n\n", argv[0]);
-				fprintf(stderr, "Comandos aceitos:\n\t");
-				fprintf(stderr, "criarConta <IP Processo Administrativo> -n <Nome> -c <CPF> -s <Saldo>\n");
+				{
+					//fail
+					fprintf(stderr, "falha ao processar %s [argumentos].\n", argv[1]);
+					fprintf(stderr, "uso:\t%s <comando> <IP Processo Administrativo> [argumentos]\n\n", argv[0]);
+					fprintf(stderr, "Comandos aceitos:\n\t");
+					fprintf(stderr, "criarConta <IP Processo Administrativo> -n <Nome> -c <CPF> -s <Saldo>\n");
+				}
 				break;
 			}			
 		}
