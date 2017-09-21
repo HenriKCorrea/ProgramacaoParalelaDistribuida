@@ -1,14 +1,22 @@
 {
         "version": "0.2.0",
         "configurations": [
+            { 
+                "name": "Attach Server",
+                "type": "cppdbg",
+                "request": "attach",
+                "program": " ${workspaceRoot}/server",
+                "processId": "${command:pickProcess}",
+                "MIMode": "gdb"
+            },
             {
                 "name": "BankRPC Launch",
                 "type": "cppdbg",
                 "request": "launch",
-                "program": "${workspaceRoot}/Client/Source/client",
-                "args": ["criarConta", "localhost", "-c", "028.107.160-80", "-n", "Henrique", "-s", "110.63"],
+                "program": "${workspaceRoot}/client",
+                "args": ["criarConta", "localhost", "-c", "99999999999", "-n", "Henrique", "-s", "110.63"],
                 "stopAtEntry": false,
-                "cwd": "${workspaceRoot}/Client/Source/",
+                "cwd": "${workspaceRoot}/",
                 "environment": [],
                 "externalConsole": true,
                 "MIMode": "gdb",
@@ -20,5 +28,24 @@
                     }
                 ]
             }
+            {
+                "name": "BankRPC Launch Server",
+                "type": "cppdbg",
+                "request": "launch",
+                "program": "${workspaceRoot}/server",
+                "args": [],
+                "stopAtEntry": false,
+                "cwd": "${workspaceRoot}/",
+                "environment": [],
+                "externalConsole": true,
+                "MIMode": "gdb",
+                "setupCommands": [
+                    {
+                        "description": "Enable pretty-printing for gdb",
+                        "text": "-enable-pretty-printing",
+                        "ignoreFailures": true
+                    }
+                ]
+            }            
         ]
     }
