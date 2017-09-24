@@ -53,6 +53,34 @@ unsigned int *create_account_1_svc(Account *newAccount, struct svc_req *req) {
 	return ((unsigned int *) &returnCode);
 }
 
+u_int *delete_account_1_svc(RPC_CPF *rpcCPF, struct svc_req *req)
+{
+	admin_error_t result = ADMIN_SUCCESS;	
+	printf("Pedido recebido para encerrar conta\n");
+
+	//Check if CPF exists
+	unsigned long tmpCPF;
+	iCPFtol(&tmpCPF, rpcCPF->CPF);
+	int accountIndex = getAccountIndex(accDatabase, accDatabase_Size, tmpCPF);
+	if(accountIndex != -1)
+	{
+		//Delete account
+		memset(&accDatabase[accountIndex], 0, sizeof(Account));
+		sortDatabase(accDatabase, accDatabase_Size, accountIndex);
+		--accDatabase_Size;
+		printf("Conta deletada com sucesso!\n");
+	}
+	else
+	{
+		result = ADMIN_DA_ACCNOTEXIST;
+		printAdminError(result);			
+	}
+
+
+	returnCode = result;
+	return ((unsigned int *)&returnCode);
+}
+
 //TODO
 //Criar metodo de deletar conta
 //Criar metodo de depositar dinheiro na conta

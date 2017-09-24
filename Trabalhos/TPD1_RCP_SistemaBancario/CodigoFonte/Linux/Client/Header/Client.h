@@ -27,6 +27,8 @@ client_error_type client_SetAgencyNumber(Account* clientAccount, const char* arg
 
 int createRPCConnection(CLIENT **client, char *serverIP);
 
+client_error_type client_ExtractCPF(unsigned long *CPF, const char* argv);
+
 /************************************************************************/
 /* Auxiliary public methods                                             */
 /************************************************************************/

@@ -35,7 +35,12 @@ void printAdminError(admin_error_t errorCode)
         fprintf(stderr, "Falha ao tentar criar conta: CPF ja existe no banco de dados\n");
         break;
 
+        case ADMIN_DA_ACCNOTEXIST:
+        fprintf(stderr, "Falha ao executar operacao deletar conta: Nenhum conta encontrada para o CPF informado.\n");
+        break;
+
         default:
+        fprintf(stderr, "Falha ocorrida numero:%d\n", errorCode);
         break;
     }
 }

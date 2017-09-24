@@ -20,7 +20,7 @@ typedef enum operation_type {
 static const char* m_argParser_commandList[] = {
 	"",
 	"CRIARCONTA", 
-	"EXCLUIRCONTA",
+	"ENCERRARCONTA",
 	"AUTENTICARCONTA",
 	"DEPOSITAR",
 	"RETIRAR"};

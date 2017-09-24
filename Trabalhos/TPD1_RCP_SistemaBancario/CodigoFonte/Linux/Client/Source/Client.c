@@ -134,30 +134,30 @@ int createRPCConnection(CLIENT **client, char* serverIP)
 	return result;
 }
 
-//TO IMPLEMENT
-client_error_type client_ExtractCPF(Account* clientAccount, const char* argv)
+
+client_error_type client_ExtractCPF(unsigned long *CPF, const char* argv)
 {
 	client_error_type opResult = CLIENT_SUCCESS;
-	// size_t argv_len = strlen(argv);
+	size_t argv_len = strlen(argv);
 
-	// if (argv_len > (ACC_CPF_DIGITS + ACC_CPF_DOT_DASHES))
-	// {
-	// 	opResult = CLIENT_CPF_SIZE_OVERFLOW;
-	// }
-	// else
-	// {
-	// 	char tmpCPFBuffer[ACC_CPF_DIGITS + ACC_CPF_DOT_DASHES] = "";
-	// 	int numOfDigitsExtracted = extractStringDigits(tmpCPFBuffer, argv);
-	// 	if (numOfDigitsExtracted < ACC_CPF_DIGITS)
-	// 	{
-	// 		opResult = CLIENT_CPF_SIZE_UNDERFLOW;
-	// 	} 
-	// 	else
-	// 	{
-	// 		unsigned long tmpCPF = strtoul(tmpCPFBuffer, NULL, 10);
-	// 		lCPFtoi(clientAccount->CPF, &tmpCPF);
-	// 	}
-	// }
+	if (argv_len > (ACC_CPF_DIGITS + ACC_CPF_DOT_DASHES))
+	{
+		opResult = CLIENT_CPF_SIZE_OVERFLOW;
+	}
+	else
+	{
+		char tmpCPFBuffer[ACC_CPF_DIGITS + ACC_CPF_DOT_DASHES] = "";
+		int numOfDigitsExtracted = extractStringDigits(tmpCPFBuffer, argv);
+		if (numOfDigitsExtracted < ACC_CPF_DIGITS)
+		{
+			opResult = CLIENT_CPF_SIZE_UNDERFLOW;
+		} 
+		else
+		{
+			*CPF = strtoul(tmpCPFBuffer, NULL, 10);
+			
+		}
+	}
 	return opResult;
 }
 

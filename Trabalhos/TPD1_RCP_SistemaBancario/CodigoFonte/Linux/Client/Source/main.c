@@ -82,11 +82,13 @@ int main(int argc, char** argv)
 					{
 						//Set CPF
 						unsigned long CPF = 0;
-						client_error_type opResult = client_ExtractCPF(CPF, argv[cpfArgIndex + 1]);//TO IMPLEMENT
+						client_error_type opResult = client_ExtractCPF(&CPF, argv[cpfArgIndex + 1]);
 						if(opResult == CLIENT_SUCCESS)
 						{
 							//Send command to server
-							admin_error_t answer= *delete_account_1(newClientAccount,cl);	//TO IMPLEMENT
+							RPC_CPF outData;
+							lCPFtoi(outData.CPF, &CPF);
+							admin_error_t answer= *delete_account_1(&outData,cl);	
 							if(answer == ADMIN_SUCCESS)
 							{
 								printf("Operação realizada com sucesso!\n");

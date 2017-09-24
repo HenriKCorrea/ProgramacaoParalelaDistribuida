@@ -11,11 +11,17 @@ struct Account
 	double balance;
 };
 
+struct RPC_CPF
+{
+	unsigned int CPF[2];
+};
+
 /* arguments for RPC must be one single */
 /* value or a structure of values */
 /* first_num and second_num are addends */
 program RPCBANK_PROGRAM {             /*value to register the program */
 version RPCBANK_VERS {             /*version must be assigned a value */
 unsigned int CREATE_ACCOUNT(Account) = 1;       /*this is the service function */
+unsigned int DELETE_ACCOUNT(RPC_CPF) = 2;
 } =1;                           /*version value */
 } = 0x20000001;                 /*program value */
