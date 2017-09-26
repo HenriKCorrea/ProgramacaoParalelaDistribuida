@@ -87,7 +87,7 @@ static const char *m_argParser_optArgsLong[] = {
 *
 * @author Henrique Krausburg Corr�a
 */
-operation_type argParser_GetCommand(int commandIndex, char** argv);
+operation_type argParser_GetCommand(int commandIndex, char** argv, int argc);
 
 unsigned int argParser_ExtractOptArgsFlag(int argc, char** argv);
 

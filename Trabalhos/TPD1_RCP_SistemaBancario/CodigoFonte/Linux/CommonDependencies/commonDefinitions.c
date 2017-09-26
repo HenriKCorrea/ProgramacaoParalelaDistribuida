@@ -20,7 +20,7 @@ void printAccount(Account *acc)
     unsigned long int tmpCPF;
     iCPFtol(&tmpCPF, acc->CPF);
     printf("CPF: %ld\n", tmpCPF);
-    printf("Saldo: %f.2\n", acc->balance);
+    printf("Saldo: %.2f\n", acc->balance);
 }
 
 void printAdminError(admin_error_t errorCode)
@@ -37,6 +37,10 @@ void printAdminError(admin_error_t errorCode)
 
         case ADMIN_DA_ACCNOTEXIST:
         fprintf(stderr, "Falha ao executar operacao deletar conta: Nenhum conta encontrada para o CPF informado.\n");
+        break;
+
+        case ADMIN_WITHDRAW_NOMONEY:
+        fprintf(stderr, "Falha ao executar operacao Saque: Saldo insulficiente.\n");
         break;
 
         default:
@@ -60,9 +64,10 @@ void printClientError(client_error_type errorCode)
         
         case CLIENT_BALANCE_DECIMAL_OVERFLOW:
         fprintf(stderr, "Campo 'Saldo' invalido. Use o formato xxx.xx\n");
-        break;        
+        break;
 
         default:
+        fprintf(stderr, "Falha ocorrida numero:%d\n", errorCode);
         break;
     }
 }

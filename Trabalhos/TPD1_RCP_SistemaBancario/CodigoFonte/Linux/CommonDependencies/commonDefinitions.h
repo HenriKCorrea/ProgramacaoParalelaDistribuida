@@ -33,7 +33,8 @@ typedef enum admin_error
 	ADMIN_SUCCESS = 0,
 	ADMIN_CA_DATABASEFULL = 1,
 	ADMIN_CA_CPFNOTEQUAL = 2,
-	ADMIN_DA_ACCNOTEXIST = 3
+	ADMIN_DA_ACCNOTEXIST = 3,
+	ADMIN_WITHDRAW_NOMONEY = 4
 }admin_error_t;
 
 typedef struct Account_User

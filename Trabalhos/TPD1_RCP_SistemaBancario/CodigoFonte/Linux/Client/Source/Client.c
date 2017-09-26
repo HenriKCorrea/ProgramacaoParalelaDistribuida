@@ -161,6 +161,23 @@ client_error_type client_ExtractCPF(unsigned long *CPF, const char* argv)
 	return opResult;
 }
 
+client_error_type client_ExtractValue(double *value, const char* argv)
+{
+	client_error_type opResult = CLIENT_SUCCESS;
+
+	double extractedBalance = strtod(argv, NULL);
+	if (isBalanceValid(extractedBalance) == 0)
+	{
+		opResult = CLIENT_BALANCE_DECIMAL_OVERFLOW;
+	} 
+	else
+	{
+		*value= extractedBalance;
+	}
+
+	return opResult;
+}
+
 
 
 /************************************************************************/

@@ -9,25 +9,28 @@
 //////////////////////////////////////////////////////////////////////////
 
 //Read "argv" in index "commandIndex" and, if is a valid command, extract its correspondent enum "operation_type"
-operation_type argParser_GetCommand(int commandIndex, char ** argv)
+operation_type argParser_GetCommand(int commandIndex, char ** argv, int argc)
 {
 	operation_type resultCommand = OP_T_INVALID; //command variable to be returned to the user.
 
-	//Convert command to uppercase
-	char argvCommandUpperCase[50] = {""};
-	size_t argvSize = strlen(argv[commandIndex]);
-	if (argvSize < 50)
+	if(argc > 1)
 	{
-		stringToUpper(argvCommandUpperCase, argv[commandIndex], argvSize);
-
-		//Loop over console arguments to verify if the first argument is a valid command
-		for (int i = 1; i < numOfOperations + 1; ++i)
+		//Convert command to uppercase
+		char argvCommandUpperCase[50] = {""};
+		size_t argvSize = strlen(argv[commandIndex]);
+		if (argvSize < 50)
 		{
-			if (strcmp(argvCommandUpperCase, m_argParser_commandList[i]) == 0)
+			stringToUpper(argvCommandUpperCase, argv[commandIndex], argvSize);
+
+			//Loop over console arguments to verify if the first argument is a valid command
+			for (int i = 1; i < numOfOperations + 1; ++i)
 			{
-				//If command match, set enum and exit loop.
-				resultCommand = i;
-				break;
+				if (strcmp(argvCommandUpperCase, m_argParser_commandList[i]) == 0)
+				{
+					//If command match, set enum and exit loop.
+					resultCommand = i;
+					break;
+				}
 			}
 		}
 	}

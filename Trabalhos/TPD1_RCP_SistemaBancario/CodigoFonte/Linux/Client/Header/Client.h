@@ -29,6 +29,8 @@ int createRPCConnection(CLIENT **client, char *serverIP);
 
 client_error_type client_ExtractCPF(unsigned long *CPF, const char* argv);
 
+client_error_type client_ExtractValue(double *value, const char* argv);
+
 /************************************************************************/
 /* Auxiliary public methods                                             */
 /************************************************************************/

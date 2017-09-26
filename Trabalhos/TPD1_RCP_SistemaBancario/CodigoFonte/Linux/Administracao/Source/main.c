@@ -16,6 +16,8 @@ static unsigned int accDatabase_NextID = 0;
 
 static unsigned int returnCode = 0;
 
+static serverReturn_t clientReturn = {};
+
 
 unsigned int *create_account_1_svc(Account *newAccount, struct svc_req *req) {
 	admin_error_t result = ADMIN_SUCCESS;	
@@ -81,7 +83,97 @@ u_int *delete_account_1_svc(RPC_CPF *rpcCPF, struct svc_req *req)
 	return ((unsigned int *)&returnCode);
 }
 
-//TODO
-//Criar metodo de deletar conta
-//Criar metodo de depositar dinheiro na conta
-//Criar metodo de sacar dinheiro da conta
+u_int * deposit_1_svc(balanceOperation_t *balanceData, struct svc_req *req)
+{
+	admin_error_t result = ADMIN_SUCCESS;	
+	printf("Pedido recebido para deposito\n");
+
+	//Check if CPF exists
+	unsigned long tmpCPF;
+	iCPFtol(&tmpCPF, balanceData->CPF);
+	int accountIndex = getAccountIndex(accDatabase, accDatabase_Size, tmpCPF);
+	if(accountIndex != -1)
+	{
+		//Deposit money
+		accDatabase[accountIndex].balance += balanceData->balance;
+
+		printf("Valor depositado com sucesso!\n");
+	}
+	else
+	{
+		result = ADMIN_DA_ACCNOTEXIST;
+		printAdminError(result);
+	}
+
+
+	returnCode = result;
+	return ((unsigned int *)&returnCode);	
+}
+
+
+serverReturn_t * withdraw_1_svc(balanceOperation_t *balanceData, struct svc_req *req)
+{
+	admin_error_t result = ADMIN_SUCCESS;	
+	memset(&clientReturn, 0, sizeof(clientReturn));
+	clientReturn.errorCode = ADMIN_SUCCESS;
+	printf("Pedido recebido para saque\n");
+
+	//Check if CPF exists
+	unsigned long tmpCPF;
+	iCPFtol(&tmpCPF, balanceData->CPF);
+	int accountIndex = getAccountIndex(accDatabase, accDatabase_Size, tmpCPF);
+	if(accountIndex != -1)
+	{
+		//Check if there's money available in account
+		if(accDatabase[accountIndex].balance < balanceData->balance)
+		{
+			result = ADMIN_WITHDRAW_NOMONEY;
+			printAdminError(result);	
+		}
+		else
+		{
+			//Withdraw money
+			accDatabase[accountIndex].balance -= balanceData->balance;
+			clientReturn.account = accDatabase[accountIndex];
+			printf("Valor sacado com sucesso!\n");
+			printAccount(&clientReturn.account);
+		}
+	}
+	else
+	{
+		result = ADMIN_DA_ACCNOTEXIST;
+		printAdminError(result);			
+	}
+
+	clientReturn.errorCode = result;
+	return &clientReturn;	
+}
+
+
+serverReturn_t *authenticate_account_1_svc(RPC_CPF *rpcCPF, struct svc_req *req)
+{
+	admin_error_t result = ADMIN_SUCCESS;	
+	memset(&clientReturn, 0, sizeof(clientReturn));
+	clientReturn.errorCode = ADMIN_SUCCESS;	
+	printf("Pedido recebido para autenticar conta\n");
+
+	//Check if CPF exists
+	unsigned long tmpCPF;
+	iCPFtol(&tmpCPF, rpcCPF->CPF);
+	int accountIndex = getAccountIndex(accDatabase, accDatabase_Size, tmpCPF);
+	if(accountIndex != -1)
+	{	
+		clientReturn.account = accDatabase[accountIndex];
+		printf("Conta autenticada com sucesso!\n");
+		printAccount(&clientReturn.account);
+	}
+	else
+	{
+		result = ADMIN_DA_ACCNOTEXIST;
+		printAdminError(result);			
+	}
+
+
+	clientReturn.errorCode = result;
+	return &clientReturn;
+}
