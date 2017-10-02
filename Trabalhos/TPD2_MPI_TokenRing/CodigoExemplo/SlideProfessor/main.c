@@ -6,10 +6,8 @@ int main(int argc, char **argv)
 {
     int my_rank;  /* Identificador do processo */
     int proc_n;   /* Número de processos */
-    int source;   /* Identificador do proc.
-origem */
-    int dest;     /* Identificador do proc.
-destino */
+    int source;   /* Identificador do proc.origem */
+    int dest;     /* Identificador do proc.destino */
     int tag = 50; /* Tag para as mensagens */
 char message[100]; /* Buffer para as mensagens */
 MPI_Status status; /* Status de retorno */
@@ -19,11 +17,13 @@ MPI_Comm_size(MPI_COMM_WORLD, &proc_n);
 if (my_rank != 0)
 {
         sprintf(message, "Greetings from process %d!", my_rank);
+        printf("Flood do processo %d!", my_rank);
         dest = 0;
-        MPI_send(message, strlen(message) + 1, MPI_CHAR, dest, tag, MPI_COMM_WORLD);
+        MPI_Send(message, strlen(message) + 1, MPI_CHAR, dest, tag, MPI_COMM_WORLD);
 }
 else
 {
+        printf("O mestre chegou!\nHoje la na casa do seu Ze vai rolar uma ousadia!\n");
         for (source = 1; source < proc_n; source++)
         {
             MPI_Recv(message, 100, MPI_CHAR, source, tag, MPI_COMM_WORLD, &status);
