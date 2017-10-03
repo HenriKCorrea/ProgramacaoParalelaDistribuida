@@ -1,25 +1,19 @@
 #ifndef MASTERPROCESS__H
 #define MASTERPROCESS__H
 
+#include "GlobalDefinitions.h"
+
 class MasterProcess
 {
 public: //Methods
-    MasterProcess(){}
+    MasterProcess(int proc_n);
     ~MasterProcess(){}
 
     void run();
 
 private: //Members
-    
-
-    int my_rank;  /* Identificador do processo */
-    int proc_n;   /* Número de processos */
-    int source;   /* Identificador do proc.origem */
-    int dest;     /* Identificador do proc.destino */
-    int tag = 50; /* Tag para as mensagens */
-char message[100]; /* Buffer para as mensagens */
-MPI_Status status; /* Status de retorno */
-
+    int m_Proc_n;
+    char m_Message[MESSAGE_SIZE]; /* Buffer para as mensagens */    
 };
 
 #endif //MASTERPROCESS__H

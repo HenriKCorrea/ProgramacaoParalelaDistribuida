@@ -1,1 +1,13 @@
 Processo mestre será o número zero
+
+
+DEVE PULAR NA MENSAGEM O QUE FALHOU
+
+Mensagem teste:
+perguntar para o processo: quem você acha para coordenador
+
+
+Algoritmo: fazer pular quem acha que é o coordenador
+
+
+Coordenador deve ter uma tabela de referencia
