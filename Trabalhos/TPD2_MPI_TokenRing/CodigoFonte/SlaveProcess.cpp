@@ -10,6 +10,7 @@ SlaveProcess::SlaveProcess(bool isCoordinator, int myRank, int proc_n)
 {
         m_IsCoordinator = isCoordinator;
         m_MyRank = myRank;
+        m_Priority = myRank;
         m_Proc_n = proc_n;
         
         memset(m_Message, 0, MESSAGE_SIZE);

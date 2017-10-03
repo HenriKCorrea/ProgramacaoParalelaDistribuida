@@ -16,7 +16,8 @@ private:    //Members
     int m_MyRank;
     int m_Proc_n;
     char m_Message[MESSAGE_SIZE]; /* Buffer para as mensagens */
-    
+
+    int m_Priority;   //Prioridade utilizada durante eleições. Deve ser unico entre todas as classes
 };
 
 #endif //SLAVEPROCESS__H

@@ -7,9 +7,13 @@ class MasterProcess
 {
 public: //Methods
     MasterProcess(int proc_n);
-    ~MasterProcess(){}
+    //~MasterProcess(){}
 
     void run();
+
+private: //Members
+    void mainMenu();
+    void printOption(commDef::enmTagCommand command);
 
 private: //Members
     int m_Proc_n;
