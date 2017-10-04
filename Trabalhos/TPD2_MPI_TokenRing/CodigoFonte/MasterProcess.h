@@ -7,16 +7,16 @@ class MasterProcess
 {
 public: //Methods
     MasterProcess(int proc_n);
-    //~MasterProcess(){}
+    ~MasterProcess(){}
 
     void run();
 
 private: //Members
     void mainMenu();
-    void printOption(commDef::enmTagCommand command);
+    void printOption(enmTagCommand command);
 
 private: //Members
-    int m_Proc_n;
+    int m_Proc_n;   //Numero total de processos
     char m_Message[MESSAGE_SIZE]; /* Buffer para as mensagens */    
 };
 
