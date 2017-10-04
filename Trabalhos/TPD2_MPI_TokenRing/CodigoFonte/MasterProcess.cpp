@@ -5,9 +5,10 @@
 
 #include <mpi.h>
 
-#include <string.h>
+#include <string>
 #include <stdio.h>
 #include <iostream>
+#include <sstream>
 
 MasterProcess::MasterProcess(int proc_n)
 {
@@ -23,15 +24,26 @@ MasterProcess::MasterProcess(int proc_n)
 void MasterProcess::run()
 {
     
-    mainMenu();
+    enmTagCommand command = enmTagCommand__KillProcess;
 
+    do
+    {
+        //Call main screen to the user
+        command = mainMenu();
+
+        //Parse command
+        if(command != enmTagCommand__KillProcess)
+        {
+            callCommand(command);
+        }
+
+    }while(command != enmTagCommand__KillProcess);
+
+    
 }
 
 
-
-
-
-void MasterProcess::mainMenu()
+enmTagCommand MasterProcess::mainMenu()
 {
     std::cout << "Menu Principal - Escolha a operacao desejada:" << std::endl;
 
@@ -39,6 +51,14 @@ void MasterProcess::mainMenu()
     {
         printOption(static_cast<enmTagCommand>(command));
     }
+
+    int answer;
+    enmTagCommand commandAnswer = enmTagCommand__KillProcess;
+
+    std::cin >> answer;
+    commandAnswer = static_cast<enmTagCommand>(answer);
+    
+
 }
 
 void MasterProcess::printOption(enmTagCommand command)
@@ -56,4 +76,49 @@ void MasterProcess::printOption(enmTagCommand command)
         default:
         break;
     }
+}
+
+void MasterProcess::callCommand(enmTagCommand command)
+{
+    switch(command)
+    {
+        case enmTagCommand__Master_StartElection:
+            startElection();
+        break;
+
+        default:
+        //FAIL
+        break;
+    }
+}
+
+void MasterProcess::startElection()
+{
+    //Ask the user for the process he wants to exclude from election
+    std::cout << "Informe o número dos processos que deseja excluir da eleição (0 para terminar)" << std::endl;
+    int processId;
+    std::stringstream tmpBuffer;
+
+    do
+    {
+        std::cin >> processId;
+        tmpBuffer << processId;
+    }while (processId != 0);
+
+    std::cout << "Dados recebidos: " << tmpBuffer.str() << std::endl;
+
+    //Ask process to start election
+    std::cout << "Informe o processo que iniciara a eleição:" << std::endl;
+    std::cin >> processId;
+    tmpBuffer << processId;
+
+    //Send message
+    memcpy(m_Message, tmpBuffer.str().c_str(), tmpBuffer.str().size()); //Set message payload
+    std::cout << "Mensagem: " << m_Message << std::endl;
+    sendMPIMessage(enmTagCommand__Master_StartElection, processId);
+}
+
+void MasterProcess::sendMPIMessage(enmTagCommand commandTag, int destProcessId)
+{
+    MPI_Send(m_Message, strlen(m_Message) + 1, MPI_CHAR, destProcessId, commandTag, MPI_COMM_WORLD);
 }
