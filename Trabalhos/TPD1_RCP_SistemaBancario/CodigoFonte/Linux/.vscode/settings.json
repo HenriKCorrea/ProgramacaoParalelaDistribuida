@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "stdio.h": "c",
+        "rpcbank.h": "c",
+        "commandlineargparser.h": "c",
+        "commondefinitions.h": "c",
+        "administracao.h": "c"
+    }
+}
