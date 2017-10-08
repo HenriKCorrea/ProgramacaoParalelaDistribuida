@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <sstream>
+#include <cstring>
 
 MasterProcess::MasterProcess(int proc_n)
 {
@@ -32,14 +33,12 @@ void MasterProcess::run()
         command = mainMenu();
 
         //Parse command
-        if(command != enmTagCommand__KillProcess)
-        {
-            callCommand(command);
-        }
+        callCommand(command);
+        
 
     }while(command != enmTagCommand__KillProcess);
+    std::cout << "Encerrando processo..." << std::endl;
 
-    
 }
 
 
@@ -58,7 +57,6 @@ enmTagCommand MasterProcess::mainMenu()
     std::cin >> answer;
     commandAnswer = static_cast<enmTagCommand>(answer);
     
-
 }
 
 void MasterProcess::printOption(enmTagCommand command)
@@ -82,14 +80,29 @@ void MasterProcess::callCommand(enmTagCommand command)
 {
     switch(command)
     {
+        case enmTagCommand__KillProcess:
+            killProcess();
+        break;
+
+
         case enmTagCommand__Master_StartElection:
             startElection();
         break;
 
         default:
-        //FAIL
+            std::cout << "Invalid command." << std::endl;
         break;
     }
+}
+
+void MasterProcess::killProcess()
+{
+    //Set Id of process to stop propagating kill messages.
+    static const int lastProcessId = 1;
+    sprintf(m_Message, "%d", lastProcessId);
+
+    //Start propagating kill messages
+    sendMPIMessage(enmTagCommand__KillProcess, _getNextRank(lastProcessId));
 }
 
 void MasterProcess::startElection()
@@ -103,6 +116,7 @@ void MasterProcess::startElection()
     {
         std::cin >> processId;
         tmpBuffer << processId;
+        tmpBuffer << " ";
     }while (processId != 0);
 
     std::cout << "Dados recebidos: " << tmpBuffer.str() << std::endl;
@@ -110,7 +124,6 @@ void MasterProcess::startElection()
     //Ask process to start election
     std::cout << "Informe o processo que iniciara a eleição:" << std::endl;
     std::cin >> processId;
-    tmpBuffer << processId;
 
     //Send message
     memcpy(m_Message, tmpBuffer.str().c_str(), tmpBuffer.str().size()); //Set message payload
@@ -121,4 +134,17 @@ void MasterProcess::startElection()
 void MasterProcess::sendMPIMessage(enmTagCommand commandTag, int destProcessId)
 {
     MPI_Send(m_Message, strlen(m_Message) + 1, MPI_CHAR, destProcessId, commandTag, MPI_COMM_WORLD);
+}
+
+int MasterProcess::_getNextRank(int myRank)
+{
+    int result = myRank + 1;
+    
+        //If rank is greather than the number of process, return firtst process rank (circular buffer)
+        if(result >= m_Proc_n) 
+        {
+                result = 1;
+        }
+
+    return result;    
 }

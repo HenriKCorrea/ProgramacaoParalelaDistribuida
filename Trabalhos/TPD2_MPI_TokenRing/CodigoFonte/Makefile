@@ -18,6 +18,8 @@ SlaveProcess.o:
 clean:
 	-rm Main
 	-rm *.o
+	-rm *.txt
+	-rm LogOutput/*.txt
 
 run:
 	mpirun -n 6 ./Main

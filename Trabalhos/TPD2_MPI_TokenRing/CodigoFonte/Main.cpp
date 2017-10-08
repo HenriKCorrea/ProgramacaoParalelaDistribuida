@@ -25,5 +25,6 @@ else
     MasterProcess process(proc_n);
     process.run();
 }
+MPI_Barrier(MPI_COMM_WORLD); //Finish program only when all process close execution
 MPI_Finalize();
 }

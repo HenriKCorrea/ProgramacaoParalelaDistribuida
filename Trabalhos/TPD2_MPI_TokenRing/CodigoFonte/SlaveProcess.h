@@ -3,6 +3,10 @@
 
 #include "GlobalDefinitions.h"
 
+#include <iostream>
+#include <fstream>
+#include <vector>
+
 class SlaveProcess
 {
 public: //Methods
@@ -10,6 +14,25 @@ public: //Methods
     ~SlaveProcess(){}
 
     void run();
+
+private: //Methods
+    void callCommand(enmTagCommand command);
+    int election_GetNextProcess(int myRank, std::vector<int> *excludeList);
+
+    /***********************/
+    /* command methods     */
+    /***********************/
+    void killProcess();
+    void startElection();
+    void masterStartElection();
+
+    /*****************************/
+    /* communication methods     */
+    /*****************************/
+
+    void sendMPIMessage(enmTagCommand commandTag, int destProcessId);
+    enmTagCommand receiveMPIMessage(int source);
+
 
 private:    //Members
 
@@ -23,6 +46,8 @@ private:    //Members
     int m_NextProcess; //Next process rank to send messages
 
     int m_Priority;   //Prioridade utilizada durante eleições. Deve ser unico entre todas as classes
+
+    std::ofstream m_OutLogFile;
 };
 
 #endif //SLAVEPROCESS__H

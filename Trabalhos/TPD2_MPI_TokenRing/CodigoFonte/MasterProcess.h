@@ -19,6 +19,7 @@ private: //Methods
     /***********************/
     /* command methods     */
     /***********************/
+    void killProcess();
     void startElection();
 
 
@@ -26,7 +27,10 @@ private: //Methods
     /* communication methods     */
     /*****************************/
 
+    
     void sendMPIMessage(enmTagCommand commandTag, int destProcessId);
+    
+    int _getNextRank(int myRank);
 
 private: //Members
     int m_Proc_n;   //Numero total de processos
