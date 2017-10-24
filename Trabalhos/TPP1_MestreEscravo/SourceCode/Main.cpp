@@ -69,25 +69,26 @@ int main(int argc, char **argv)
         size_t ARRAY_SIZE = atoi(argv[1]);
         size_t TAREFAS = atoi(argv[2]);
 
+            //Create message buffer
+            int *message = new int[ARRAY_SIZE];       // Buffer para as mensagens  
+            int *pMessage;
 
         //Init master and slave process
         if (my_rank == 0)
         {
             //Master process         
 
-            //Create message buffer
-            int *message = new int[ARRAY_SIZE];       // Buffer para as mensagens  
-            int *pMessage;
-
             //Create work stack
             SacoDeTrabalho saco(ARRAY_SIZE, TAREFAS, proc_n);
 
+            printf("Saco de trabalho criado. Valor inicial:\n");
+            saco.printSaco();
 
             // mando o trabalho para os escravos fazerem
-            for(int i = 0; (i < saco.m_Proc_n) && (i < saco.m_NumberOfTasks); ++i)
+            for(int i = 1; (i < saco.m_Proc_n) && (i < saco.m_NumberOfTasks); ++i)
             {
-                pMessage = saco.getNextTaskForSlave(i + 1);
-                MPI_Send(pMessage, saco.m_ArraySize, MPI_INT, i + 1, enmTagCommand__SendVector, MPI_COMM_WORLD);
+                pMessage = saco.getNextTaskForSlave(i);
+                MPI_Send(pMessage, saco.m_ArraySize, MPI_INT, i, enmTagCommand__SendVector, MPI_COMM_WORLD);
             }
 
             
@@ -107,27 +108,37 @@ int main(int argc, char **argv)
                 }
             }
 
+            //Kill all remaining slaves
+            for(int i = 1; i < saco.m_Proc_n; ++i)
+                MPI_Send(message, 1, MPI_INT, i, enmTagCommand__KillProcess, MPI_COMM_WORLD);
+
+
             //saco shall be sorted at this point
+            printf("Ordenação do saco de trabalho concluído! Resultado:\n");
+            saco.printSaco();            
 
         }
         else
         {
-             //Slave Process
-
+            //Slave Process
             MPI_Status status; /* Return status*/
-            //check if task is sort or kilk
+            do
+            {
+                //Get work from master
+                MPI_Recv(message, ARRAY_SIZE, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+                if(status.MPI_TAG == enmTagCommand__SendVector)
+                {
+                    //printf("Processo %d recebeu uma nova tarefa!\n", my_rank);
+                    //Sort vector
+                    bs(ARRAY_SIZE, message);
+                    //Send vector for master and ask for more work
+                    MPI_Send(message, ARRAY_SIZE, MPI_INT, status.MPI_SOURCE, enmTagCommand__SendVector, MPI_COMM_WORLD);
+                }
+            }while(status.MPI_TAG != enmTagCommand__KillProcess);
 
-            //do
-                //Read vector
-                //Sort vector
-                //send vector
-            //while(tag != kill)
-        }        
-
-
+            //printf("Processo %d cometeu suicidio!\n", my_rank);
+        }     
     }
-
-
 
     MPI_Barrier(MPI_COMM_WORLD); //Finish program only when all process close execution
     MPI_Finalize();

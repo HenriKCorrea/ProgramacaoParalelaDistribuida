@@ -16,6 +16,8 @@ public:
     int getTaskIndexInStack(int slaveRank);
     void setCompletedTaskInStack(int *task, int slaveRank);
 
+    void printSaco();
+
     /******************/
     /* Public Members */
     /******************/     

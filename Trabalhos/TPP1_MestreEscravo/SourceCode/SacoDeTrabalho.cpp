@@ -69,3 +69,16 @@ void SacoDeTrabalho::setCompletedTaskInStack(int *task, int slaveRank)
     ++m_NumOfTasksCompleted;
     --m_NumOfTasksInProgress;
 }
+
+void SacoDeTrabalho::printSaco()
+{
+    for(int i = 0; i < m_NumberOfTasks; ++i)
+    {
+        printf("{%d} - [", i);
+        for(int j = 0; j < m_ArraySize; ++j)
+        {
+            printf(" %d ", m_Saco[i][j]);
+        }
+        printf("]\n");
+    }
+}
