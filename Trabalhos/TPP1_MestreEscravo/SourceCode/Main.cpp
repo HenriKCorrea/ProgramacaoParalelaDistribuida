@@ -39,6 +39,15 @@ void bs(int n, int * vetor)
         }
 }
 
+/*
+*   Quicksort compare function
+*/
+
+int compare (const void * a, const void * b)
+{
+  return ( *(int*)a - *(int*)b );
+}
+
 int main(int argc, char **argv)
 {
     int my_rank;  /* Identificador do processo */
@@ -54,35 +63,58 @@ int main(int argc, char **argv)
 
     
     //Parse arguments
-    if(argc != 3)
+    if(argc < 3)
     {
         if(my_rank == 0)
         {
-            fprintf(stderr, "Uso:\t%s <tamanho tarefa (vetor)> <numero de tarefas (tamanho saco)>", argv[0]);
+            fprintf(stderr, "Uso:\t%s <tamanho tarefa (vetor)> <numero de tarefas (tamanho saco)> [-qsort]", argv[0]);
             result = 1;
         }
     }
-    else
+    else 
     {
-
+        //Check if quicksort is set
+        bool isQuickSortSet(false);
+        if(argc >= 4)
+        {
+            if(strcmp(argv[3], "-qsort"))
+            {   
+                isQuickSortSet = true;
+            }
+        }
         //Get work array size and number of tasks
         size_t ARRAY_SIZE = atoi(argv[1]);
         size_t TAREFAS = atoi(argv[2]);
 
-            //Create message buffer
-            int *message = new int[ARRAY_SIZE];       // Buffer para as mensagens  
-            int *pMessage;
+        //Create message buffer
+        int *message = new int[ARRAY_SIZE];       // Buffer para as mensagens  
+        int *pMessage;
 
         //Init master and slave process
         if (my_rank == 0)
         {
-            //Master process         
+            //Master process
+
+            //print quicksort flag
+            if(isQuickSortSet)
+            {
+                printf("Algoritmo de ordenação selecionado: Quick Sort\n");
+            }
+            else
+            {
+                printf("Algoritmo de ordenação selecionado: Bubble Sort\n");
+            }
+    
 
             //Create work stack
             SacoDeTrabalho saco(ARRAY_SIZE, TAREFAS, proc_n);
 
-            printf("Saco de trabalho criado. Valor inicial:\n");
-            saco.printSaco();
+            // printf("Saco de trabalho criado. Valor inicial:\n");
+            // saco.printSaco();
+
+            //Start clock to measure time
+            double t1, t2;
+            t1 = MPI_Wtime();        // contagem de tempo inicia neste ponto
 
             // mando o trabalho para os escravos fazerem
             for(int i = 1; (i < saco.m_Proc_n) && (i < saco.m_NumberOfTasks); ++i)
@@ -108,15 +140,22 @@ int main(int argc, char **argv)
                 }
             }
 
+            //Stop clock
+            t2 = MPI_Wtime();        // contagem de tempo termina neste ponto
+
+
             //Kill all remaining slaves
             for(int i = 1; i < saco.m_Proc_n; ++i)
                 MPI_Send(message, 1, MPI_INT, i, enmTagCommand__KillProcess, MPI_COMM_WORLD);
 
 
-            //saco shall be sorted at this point
-            printf("Ordenação do saco de trabalho concluído! Resultado:\n");
-            saco.printSaco();            
 
+            //saco shall be sorted at this point
+            // printf("Ordenação do saco de trabalho concluído! Resultado:\n");
+            // saco.printSaco();  
+            
+            //Print time result
+            printf("Tempo de execução do algoritmo: %f\n", t2-t1);
         }
         else
         {
@@ -130,7 +169,14 @@ int main(int argc, char **argv)
                 {
                     //printf("Processo %d recebeu uma nova tarefa!\n", my_rank);
                     //Sort vector
-                    bs(ARRAY_SIZE, message);
+                    if(isQuickSortSet)
+                    {
+                        qsort (message, ARRAY_SIZE, sizeof(int), compare);
+                    }
+                    else
+                    {
+                        bs(ARRAY_SIZE, message);
+                    }
                     //Send vector for master and ask for more work
                     MPI_Send(message, ARRAY_SIZE, MPI_INT, status.MPI_SOURCE, enmTagCommand__SendVector, MPI_COMM_WORLD);
                 }
@@ -138,6 +184,8 @@ int main(int argc, char **argv)
 
             //printf("Processo %d cometeu suicidio!\n", my_rank);
         }     
+
+        delete(message);
     }
 
     MPI_Barrier(MPI_COMM_WORLD); //Finish program only when all process close execution
