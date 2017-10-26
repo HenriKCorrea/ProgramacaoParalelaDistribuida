@@ -67,7 +67,7 @@ int main(int argc, char **argv)
     {
         if(my_rank == 0)
         {
-            fprintf(stderr, "Uso:\t%s <tamanho tarefa (vetor)> <numero de tarefas (tamanho saco)> [-qsort]", argv[0]);
+            fprintf(stderr, "Uso:\t%s <tamanho tarefa (vetor)> <numero de tarefas (tamanho saco)> [-qsort]\n", argv[0]);
             result = 1;
         }
     }
@@ -77,7 +77,7 @@ int main(int argc, char **argv)
         bool isQuickSortSet(false);
         if(argc >= 4)
         {
-            if(strcmp(argv[3], "-qsort"))
+            if(strcmp(argv[3], "-qsort") == 0)
             {   
                 isQuickSortSet = true;
             }
