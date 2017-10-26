@@ -2,6 +2,7 @@
 #define SACO_DE_TRABALHO__H
 
 #include <utility>
+#include <mpi.h>
 
 class SacoDeTrabalho
 {
@@ -15,6 +16,7 @@ public:
     int* getNextTaskForSlave(int slaveRank);
     int getTaskIndexInStack(int slaveRank);
     void setCompletedTaskInStack(int *task, int slaveRank);
+    void setCompletedTaskInStack(MPI_Status *status);
 
     void printSaco();
 

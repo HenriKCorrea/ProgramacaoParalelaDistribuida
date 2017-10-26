@@ -2,6 +2,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <mpi.h>
 
 SacoDeTrabalho::SacoDeTrabalho(int arraySize, int numberOFTasks, int numberOfProcess)
 {
@@ -69,6 +70,19 @@ void SacoDeTrabalho::setCompletedTaskInStack(int *task, int slaveRank)
     ++m_NumOfTasksCompleted;
     --m_NumOfTasksInProgress;
 }
+
+
+void SacoDeTrabalho::setCompletedTaskInStack(MPI_Status *status)
+{
+    int taskIndex = m_ProcessTaskMap[status->MPI_SOURCE];
+    m_ProcessTaskMap[status->MPI_SOURCE] = -1;
+
+    //Read and set data directly into work stack
+    MPI_Recv(m_Saco[taskIndex], m_ArraySize, MPI_INT, status->MPI_SOURCE, status->MPI_TAG, MPI_COMM_WORLD, status);
+    ++m_NumOfTasksCompleted;
+    --m_NumOfTasksInProgress;
+}
+
 
 void SacoDeTrabalho::printSaco()
 {

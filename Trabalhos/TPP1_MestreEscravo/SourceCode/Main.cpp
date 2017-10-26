@@ -127,8 +127,10 @@ int main(int argc, char **argv)
             MPI_Status status; /* Return status*/
             while(saco.m_NumOfTasksCompleted < saco.m_NumberOfTasks)
             {
-                MPI_Recv(message, saco.m_ArraySize, MPI_INT, MPI_ANY_SOURCE, enmTagCommand__SendVector, MPI_COMM_WORLD, &status);
-                saco.setCompletedTaskInStack(message, status.MPI_SOURCE);
+                MPI_Probe(MPI_ANY_SOURCE, enmTagCommand__SendVector, MPI_COMM_WORLD, &status);
+                saco.setCompletedTaskInStack(&status);  /*MPI_Recv called inside this function*/
+                //MPI_Recv(message, saco.m_ArraySize, MPI_INT, MPI_ANY_SOURCE, enmTagCommand__SendVector, MPI_COMM_WORLD, &status);
+                //saco.setCompletedTaskInStack(message, status.MPI_SOURCE);
                 pMessage = saco.getNextTaskForSlave(status.MPI_SOURCE);
                 if(pMessage == NULL)
                 {
