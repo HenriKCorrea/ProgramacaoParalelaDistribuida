@@ -8,6 +8,8 @@
 // #include "MasterProcess.h"
 // #include "SlaveProcess.h"
 
+#define DEBUG
+
 /*
 *   MPI Process tags
 */
@@ -21,36 +23,34 @@ enum enmTagCommand
 *   Global flags
 */
 class globalFlags{
-    static bool sequentialRun = false;  //If false, run paralel version application. If true, run sigle process application.
+public:
     static bool quickSortSet = false;
     static int arraySize = 0;
+    static int delta = 0;
 
-    bool parseInputArgs(int argc, char **argv, int myRank)
+    static bool parseInputArgs(int argc, char **argv, int myRank)
     {
         bool result(true);
 
-        if(argc < 2)
+        if(argc < 3)
         {
             //Invalid arg size: return false and print usage message
             result = false;
             if(myRank == 0)
             {
-                fprintf(stderr, "Uso:\t%s <tamanho tarefa (vetor)> [-qsort] [-seq]\n", argv[0]); 
+                fprintf(stderr, "Uso:\t%s <tamanho tarefa (vetor)> <delta> [-qsort]\n", argv[0]); 
             }
         }
         else
         {
             //Get mandatory arg (vector size) and read optional flags
             arraySize = atoi(argv[1]);
-            for(int i = 2; i < argc; ++i)
+            delta = atoi(argv[2]);
+            for(int i = 3; i < argc; ++i)
             {
                 if(strcmp(argv[i], "-qsort") == 0)
                 {
                     quickSortSet = true;
-                }
-                if(strcmp(argv[i], "-seq") == 0)
-                {
-                    sequentialRun = true;
                 }
             }
         }
@@ -88,6 +88,21 @@ int compare (const void * a, const void * b)
   return ( *(int*)a - *(int*)b );
 }
 
+initializeVector(int *vector, arraySize)
+{
+    for (int i = 0 ; i < arraySize; ++i)              /* init array with worst case for sorting */
+        vector[i] = arraySize - i;
+    
+        #ifdef DEBUG
+        printf("\nVetor: ");
+        for (int i=0 ; i<arraySize; i++)              /* print unsorted array */
+            printf("[%03d] ", vector[i]);
+
+        printf("\n");
+        #endif
+}
+
+
 int main(int argc, char **argv)
 {
 
@@ -97,7 +112,9 @@ int main(int argc, char **argv)
     int my_rank;  /* Identificador do processo */
     int proc_n;   /* Número de processos */
     int result = 0; /* Resultado a ser retornado pelo programa */
+    MPI_Status status;
 
+    
 
     
     MPI_Init(&argc , & argv);
@@ -106,6 +123,65 @@ int main(int argc, char **argv)
 
     
     //Parse input arguments
+    bool isArgsValid = parseInputArgs(argc, argv, my_rank);
+
+
+    if(isArgsValid)
+    {
+        int *vetor;           //pointer to data vector
+        int tam_vetor = 0;    //Vector size will be different for each process
+        if(myRank != 0)
+        {
+            //Node process
+            
+            MPI_Get_count(&Status, MPI_INT, &tam_vetor);  // descubro tamanho da mensagem recebida
+            vetor = new int[tam_vetor];
+        }
+        else
+        {
+            //Root process
+            tam_vetor = globalFlags::arraySize;    
+            initializeVector(vector, tam_vetor);
+            #ifdef DEBUG
+            printf("Algoritmo de ordenação selecionado: ");
+            if(globalFlags::quickSortSet)
+            {
+                printf("QuickSort\n");
+            }
+            else
+            {
+                printf("BubbleSort\n");
+            }
+            #endif
+        }
+
+        // dividir ou conquistar?
+        if ( tam_vetor <= delta )
+        {
+            // conquisto
+            // verifica se deve executar algorítmo bubble ou quick sort
+            if(globalFlags::quickSortSet)
+            {
+                qsort(vetor, tam_vetor, sizeof(int), compare)
+            }
+            else
+            {
+                bs(tam_vetor, vetor);  
+            }
+        }
+        else
+        {
+            // Dividir
+            // quebrar em duas partes e mandar para os filhos
+
+            MPI_Send ( &vetor[0], filho esquerda, tam_vetor/2 );  // mando metade inicial do vetor
+            MPI_Send ( &vetor[tam_vetor/2], filho direita , tam_vetor/2 );  // mando metade final
+        
+            // receber dos filhos            
+
+        }
+            
+    }
 
     // if(argc < 3)
     // {
