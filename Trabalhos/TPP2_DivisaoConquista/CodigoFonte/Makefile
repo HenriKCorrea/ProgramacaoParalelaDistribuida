@@ -1,8 +1,14 @@
 #
 # Compiler flags
 #
-CC     = mpic++
-CFLAGS = #-Wall -Werror -Wextra
+#CC     = mpic++
+#CFLAGS = -Wall -Werror -Wextra
+HOSTNAME = $(shell hostname)
+ifeq ($(HOSTNAME), marfim)
+CC = ladcomp -env mpiCC
+else
+CC = mpic++
+endif
 
 #
 # Project files
@@ -10,6 +16,14 @@ CFLAGS = #-Wall -Werror -Wextra
 SRCS = Main.cpp
 OBJS = $(SRCS:.cpp=.o)
 EXE  = Main
+ifeq ($(HOSTNAME), atlantica*)
+CEXE = ladrun -np
+TESTE = FARINHA
+else
+CEXE = mpirun -n
+TESTE = Nao_Tem_Farinha
+endif
+
 
 #
 # Project flags - TPP2 Mestre Escravo
@@ -38,6 +52,7 @@ DBGCFLAGS = -g -O0 -DDEBUG
 
 # Default build
 all: debug release
+	@echo $(TESTE)
 
 #
 # Debug rules
@@ -77,13 +92,28 @@ clean:
 	rm -f $(RELEXE) $(RELOBJS) $(DBGEXE) $(DBGOBJS)
 
 runrel:
-	mpirun -n $(NUMBER_OF_PROCESS) $(RELEXE) $(TAMANHO_VETOR) $(DELTA)
+	$(CEXE) $(NUMBER_OF_PROCESS) $(RELEXE) $(TAMANHO_VETOR) $(DELTA)
 	
 runrel2:
-	mpirun -n $(NUMBER_OF_PROCESS) $(RELEXE) $(TAMANHO_VETOR) $(DELTA) -qsort
+	$(CEXE) $(NUMBER_OF_PROCESS) $(RELEXE) $(TAMANHO_VETOR) $(DELTA) -qsort
 
 rundbg:
-	mpirun -n $(NUMBER_OF_PROCESS) $(DBGEXE) $(TAMANHO_VETOR) $(DELTA)
+	$(CEXE) $(NUMBER_OF_PROCESS) $(DBGEXE) $(TAMANHO_VETOR) $(DELTA)
 	
 rundbg2:
-	mpirun -n $(NUMBER_OF_PROCESS) $(DBGEXE) $(TAMANHO_VETOR) $(DELTA) -qsort
+	$(CEXE) $(NUMBER_OF_PROCESS) $(DBGEXE) $(TAMANHO_VETOR) $(DELTA) -qsort
+
+#
+#Acessar Sparta
+#
+#ssh portoalegre\\14104112@sparta.pucrs.br
+
+#
+#Acessar Marfim (LAD)
+#
+#ssh ppd59010@marfim.lad.pucrs.br
+
+#
+#Compilar código
+#
+#ladcomp -env mpiCC <codigo fonte>
