@@ -5,7 +5,7 @@
 #CFLAGS = -Wall -Werror -Wextra
 HOSTNAME = $(shell hostname)
 ifeq ($(HOSTNAME), marfim)
-CC = ladcomp -env mpiCC
+CC = mpiCC
 else
 CC = mpic++
 endif
@@ -16,12 +16,10 @@ endif
 SRCS = Main.cpp
 OBJS = $(SRCS:.cpp=.o)
 EXE  = Main
-ifeq ($(HOSTNAME), atlantica*)
+ifeq ($(shell echo $(HOSTNAME) | grep -o atlantica), atlantica)
 CEXE = ladrun -np
-TESTE = FARINHA
 else
 CEXE = mpirun -n
-TESTE = Nao_Tem_Farinha
 endif
 
 
@@ -52,7 +50,7 @@ DBGCFLAGS = -g -O0 -DDEBUG
 
 # Default build
 all: debug release
-	@echo $(TESTE)
+
 
 #
 # Debug rules
