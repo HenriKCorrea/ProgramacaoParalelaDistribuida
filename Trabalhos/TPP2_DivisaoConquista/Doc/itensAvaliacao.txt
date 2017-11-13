@@ -18,3 +18,30 @@ OK
     
 ->relatório no formato .pdf com duas páginas (coluna dupla), um apara a análise dos resultados e outra para o código, seguindo as recomendações fornecidas no moodle (submissão em sala de entrega moodle até as 17:30 do dia da entrega - duas semanas);
 
+
+
+
+Log comandos utilizados no LAD para parte 100.000 elementos bubble sort:
+ladalloc -c atlantica -n 2 -t 30 -e
+ppd59010@atlantica01:~/repositories/ProgramacaoParalelaDistribuida/Trabalhos/TPP2_DivisaoConquista/CodigoFonte$ ladrun -np 1 release/Main 100000 100000
+objdump: section 'environment' mentioned in a -j option, but not found in any input file
+Algoritmo de ordenação selecionado: BubbleSort
+Tempo de execução do algoritmo: 10.392029 segundos
+ppd59010@atlantica01:~/repositories/ProgramacaoParalelaDistribuida/Trabalhos/TPP2_DivisaoConquista/CodigoFonte$ ladrun -np 3 release/Main 100000 50000
+objdump: section 'environment' mentioned in a -j option, but not found in any input file
+Algoritmo de ordenação selecionado: BubbleSort
+Tempo de execução do algoritmo: 2.479156 segundos
+ppd59010@atlantica01:~/repositories/ProgramacaoParalelaDistribuida/Trabalhos/TPP2_DivisaoConquista/CodigoFonte$ ladrun -np 7 release/Main 100000 25000
+objdump: section 'environment' mentioned in a -j option, but not found in any input file
+Algoritmo de ordenação selecionado: BubbleSort
+Tempo de execução do algoritmo: 0.636836 segundos
+ppd59010@atlantica01:~/repositories/ProgramacaoParalelaDistribuida/Trabalhos/TPP2_DivisaoConquista/CodigoFonte$ ladrun -np 15 release/Main 100000 12500
+objdump: section 'environment' mentioned in a -j option, but not found in any input file
+Algoritmo de ordenação selecionado: BubbleSort
+Tempo de execução do algoritmo: 0.224804 segundos
+ppd59010@atlantica01:~/repositories/ProgramacaoParalelaDistribuida/Trabalhos/TPP2_DivisaoConquista/CodigoFonte$ ladrun -np 31 release/Main 100000 6250
+objdump: section 'environment' mentioned in a -j option, but not found in any input file
+Algoritmo de ordenação selecionado: BubbleSort
+Tempo de execução do algoritmo: 0.107499 segundos
+
+
