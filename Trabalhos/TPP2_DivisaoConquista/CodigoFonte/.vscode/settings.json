@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "initializer_list": "cpp",
+        "utility": "cpp",
+        "type_traits": "cpp",
+        "system_error": "cpp"
+    }
+}
