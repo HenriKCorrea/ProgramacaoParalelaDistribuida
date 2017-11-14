@@ -152,16 +152,16 @@ runqs6:
 	$(CEXE) 1 $(RELEXE) 1000000 1000000 -qsort
 
 runqs7:
-	$(CEXE) 3 $(RELEXE) 100000 500000 -qsort
+	$(CEXE) 3 $(RELEXE) 1000000 500000 -qsort
 
 runqs8:
-	$(CEXE) 7 $(RELEXE) 100000 250000 -qsort
+	$(CEXE) 7 $(RELEXE) 1000000 250000 -qsort
 
 runqs9:
-	$(CEXE) 15 $(RELEXE) 100000 125000 -qsort
+	$(CEXE) 15 $(RELEXE) 1000000 125000 -qsort
 
 runqs10:
-	$(CEXE) 31 $(RELEXE) 100000 62500 -qsort
+	$(CEXE) 31 $(RELEXE) 1000000 62500 -qsort
 
 
 #
