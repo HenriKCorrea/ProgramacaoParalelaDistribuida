@@ -5,7 +5,7 @@
 #CFLAGS = -Wall -Werror -Wextra
 HOSTNAME = $(shell hostname)
 ifeq ($(HOSTNAME), marfim)
-CC = mpiCC
+CC = ladcomp -env mpiCC
 else
 CC = mpic++
 endif
