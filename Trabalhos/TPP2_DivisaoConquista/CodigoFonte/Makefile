@@ -35,7 +35,9 @@ DELTA := 25000				#DELTA = TAMANHO_VETOR / NUMERO DE FOLHAS
 #
 RELDIR = release
 RELEXE = $(RELDIR)/$(EXE)
+ifeq ($(CC), mpic++)
 RELOBJS = $(addprefix $(RELDIR)/, $(OBJS))
+endif
 #RELCFLAGS = -O3 -DNDEBUG
 
 #
@@ -43,7 +45,9 @@ RELOBJS = $(addprefix $(RELDIR)/, $(OBJS))
 #
 DBGDIR = debug
 DBGEXE = $(DBGDIR)/$(EXE)
+ifeq ($(CC), mpic++)
 DBGOBJS = $(addprefix $(DBGDIR)/, $(OBJS))
+endif
 DBGCFLAGS = -g -O0 -DDEBUG
 
 .PHONY: clean debug prep_dbg prep_rel release remake runrel runrel2 rundbg rundbg2 runbs1 runbs2 runbs3 runbs4 runbs5 runbs6 runbs7 runbs8 runbs9 runbs10 runqs1 runqs2 runqs3 runqs4 runqs5 runqs6 runqs7 runqs8 runqs9 runqs10
