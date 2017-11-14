@@ -48,6 +48,48 @@ int compare (const void * a, const void * b)
   return ( *(int*)a - *(int*)b );
 }
 
+void standaloneRun(size_t ARRAY_SIZE, size_t TAREFAS, bool isQuickSortSet)
+{
+    printf("Iniciando standaloneRun...\n");
+
+    //Create work stack
+    int **m_Saco = new int*[TAREFAS];           //Create rows of the matrix
+    for(int i = 0; i < TAREFAS; ++i)
+    {
+        m_Saco[i] = new int[ARRAY_SIZE];      //Create collumns of the matrix
+
+        /* init array with worst case for sorting */
+        for (int j=0 ; j < ARRAY_SIZE; ++j)
+        {
+            m_Saco[i][j] = ARRAY_SIZE-j;
+        }
+    }
+
+    //Start clock to measure time
+    double t1, t2;
+    t1 = MPI_Wtime();        // contagem de tempo inicia neste ponto
+
+    //Sort vector
+    for(int i = 0; i < TAREFAS; ++i)
+    {
+        if(isQuickSortSet)
+        {
+            qsort (m_Saco[i], ARRAY_SIZE, sizeof(int), compare);
+        }
+        else
+        {
+            bs(ARRAY_SIZE, m_Saco[i]);
+        }
+    }
+
+    //Stop clock
+    t2 = MPI_Wtime();        // contagem de tempo termina neste ponto
+
+    //Print time result
+    printf("Tempo de execução do algoritmo: %f segundos\n", t2-t1);
+
+}
+
 int main(int argc, char **argv)
 {
     int my_rank;  /* Identificador do processo */
@@ -104,60 +146,68 @@ int main(int argc, char **argv)
             {
                 printf("Algoritmo de ordenação selecionado: Bubble Sort\n");
             }
+
     
-
-            //Create work stack
-            SacoDeTrabalho saco(ARRAY_SIZE, TAREFAS, proc_n);
-
-            // printf("Saco de trabalho criado. Valor inicial:\n");
-            // saco.printSaco();
-
-            //Start clock to measure time
-            double t1, t2;
-            t1 = MPI_Wtime();        // contagem de tempo inicia neste ponto
-
-            // mando o trabalho para os escravos fazerem
-            for(int i = 1; (i < saco.m_Proc_n) && (i < saco.m_NumberOfTasks); ++i)
+            //If there's only the master process available (no slaves), the master shall execute the tasks alone.
+            if (proc_n == 1)
             {
-                pMessage = saco.getNextTaskForSlave(i);
-                MPI_Send(pMessage, saco.m_ArraySize, MPI_INT, i, enmTagCommand__SendVector, MPI_COMM_WORLD);
+                standaloneRun(ARRAY_SIZE, TAREFAS, isQuickSortSet);
             }
-
-            
-            MPI_Status status; /* Return status*/
-            while(saco.m_NumOfTasksCompleted < saco.m_NumberOfTasks)
+            else
             {
-                MPI_Probe(MPI_ANY_SOURCE, enmTagCommand__SendVector, MPI_COMM_WORLD, &status);
-                saco.setCompletedTaskInStack(&status);  /*MPI_Recv called inside this function*/
-                //MPI_Recv(message, saco.m_ArraySize, MPI_INT, MPI_ANY_SOURCE, enmTagCommand__SendVector, MPI_COMM_WORLD, &status);
-                //saco.setCompletedTaskInStack(message, status.MPI_SOURCE);
-                pMessage = saco.getNextTaskForSlave(status.MPI_SOURCE);
-                if(pMessage == NULL)
+                //Create work stack
+                SacoDeTrabalho saco(ARRAY_SIZE, TAREFAS, proc_n);
+
+                // printf("Saco de trabalho criado. Valor inicial:\n");
+                // saco.printSaco();
+
+                //Start clock to measure time
+                double t1, t2;
+                t1 = MPI_Wtime();        // contagem de tempo inicia neste ponto
+
+                // mando o trabalho para os escravos fazerem
+                for(int i = 1; (i < saco.m_Proc_n) && (i < saco.m_NumberOfTasks); ++i)
                 {
-                    MPI_Send(message, 1, MPI_INT, status.MPI_SOURCE, enmTagCommand__KillProcess, MPI_COMM_WORLD);
+                    pMessage = saco.getNextTaskForSlave(i);
+                    MPI_Send(pMessage, saco.m_ArraySize, MPI_INT, i, enmTagCommand__SendVector, MPI_COMM_WORLD);
                 }
-                else
+
+                
+                MPI_Status status; /* Return status*/
+                while(saco.m_NumOfTasksCompleted < saco.m_NumberOfTasks)
                 {
-                    MPI_Send(pMessage, saco.m_ArraySize, MPI_INT, status.MPI_SOURCE, enmTagCommand__SendVector, MPI_COMM_WORLD);
+                    MPI_Probe(MPI_ANY_SOURCE, enmTagCommand__SendVector, MPI_COMM_WORLD, &status);
+                    saco.setCompletedTaskInStack(&status);  /*MPI_Recv called inside this function*/
+                    //MPI_Recv(message, saco.m_ArraySize, MPI_INT, MPI_ANY_SOURCE, enmTagCommand__SendVector, MPI_COMM_WORLD, &status);
+                    //saco.setCompletedTaskInStack(message, status.MPI_SOURCE);
+                    pMessage = saco.getNextTaskForSlave(status.MPI_SOURCE);
+                    if(pMessage == NULL)
+                    {
+                        MPI_Send(message, 1, MPI_INT, status.MPI_SOURCE, enmTagCommand__KillProcess, MPI_COMM_WORLD);
+                    }
+                    else
+                    {
+                        MPI_Send(pMessage, saco.m_ArraySize, MPI_INT, status.MPI_SOURCE, enmTagCommand__SendVector, MPI_COMM_WORLD);
+                    }
                 }
+
+                //Stop clock
+                t2 = MPI_Wtime();        // contagem de tempo termina neste ponto
+
+
+                //Kill all remaining slaves
+                for(int i = 1; i < saco.m_Proc_n; ++i)
+                    MPI_Send(message, 1, MPI_INT, i, enmTagCommand__KillProcess, MPI_COMM_WORLD);
+
+
+
+                //saco shall be sorted at this point
+                // printf("Ordenação do saco de trabalho concluído! Resultado:\n");
+                // saco.printSaco();  
+                
+                //Print time result
+                printf("Tempo de execução do algoritmo: %f\n", t2-t1);
             }
-
-            //Stop clock
-            t2 = MPI_Wtime();        // contagem de tempo termina neste ponto
-
-
-            //Kill all remaining slaves
-            for(int i = 1; i < saco.m_Proc_n; ++i)
-                MPI_Send(message, 1, MPI_INT, i, enmTagCommand__KillProcess, MPI_COMM_WORLD);
-
-
-
-            //saco shall be sorted at this point
-            // printf("Ordenação do saco de trabalho concluído! Resultado:\n");
-            // saco.printSaco();  
-            
-            //Print time result
-            printf("Tempo de execução do algoritmo: %f\n", t2-t1);
         }
         else
         {
