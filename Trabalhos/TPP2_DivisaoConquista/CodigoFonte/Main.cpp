@@ -32,6 +32,7 @@ public:
     static bool quickSortSet;
     static int arraySize;
     static int delta;
+    static int localSortRate;
 
     static bool parseInputArgs(int argc, char **argv, int myRank)
     {
@@ -43,19 +44,29 @@ public:
             result = false;
             if(myRank == 0)
             {
-                fprintf(stderr, "Uso:\t%s <tamanho tarefa (vetor)> <delta> [-qsort]\n", argv[0]); 
+                fprintf(stderr, "Uso:\t%s <tamanho tarefa (vetor)> <delta> [-qsort] [-ls <valor em %% entre 0 ~ 100>]\n", argv[0]); 
             }
         }
         else
         {
-            //Get mandatory arg (vector size) and read optional flags
+            //Get mandatory arg (vector size and delta value) 
             arraySize = atoi(argv[1]);
             delta = atoi(argv[2]);
+
+            //read optional args
             for(int i = 3; i < argc; ++i)
             {
                 if(strcmp(argv[i], "-qsort") == 0)
                 {
                     quickSortSet = true;
+                }
+                if((strcmp(argv[i], "-ls") == 0) && ((i + 1) < argc))
+                {
+                    localSortRate = atoi(argv[i + 1]);
+                    if((localSortRate < 0) || (localSortRate > 100))
+                    {
+                        localSortRate = 0;
+                    }
                 }
             }
         }
@@ -66,6 +77,7 @@ public:
 bool globalFlags::quickSortSet = false;
 int globalFlags::arraySize = 0;
 int globalFlags::delta = 0;
+int globalFlags::localSortRate = 0;
 ///////////
 
 /*
@@ -161,7 +173,6 @@ void initializeVector(int *vector, int arraySize)
 * recebe um ponteiro para um vetor que contem as mensagens recebidas dos filhos e            
 * intercala estes valores em um terceiro vetor auxiliar. Devolve um ponteiro para este vetor 
 */
-//int *interleaving(int vetor[], int tam)
 int *interleaving(int *vetor, int tam, int tam_vetor_esquera)
 {
 	int *vetor_auxiliar;
@@ -185,6 +196,38 @@ int *interleaving(int *vetor, int tam, int tam_vetor_esquera)
 	return vetor_auxiliar;
 }
 
+int *interleaving(int *vetor, int tam, int tam_vetor_local, int tam_vetor_esquera)
+{
+	int *vetor_auxiliar;
+	int i1, i2, i3, i_aux;
+
+	vetor_auxiliar = new int[tam];//(int *)malloc(sizeof(int) * tam);
+
+	i1 = 0;
+    i2 = tam_vetor_local;
+    i3 = tam_vetor_local + tam_vetor_esquera;
+    
+    for(i_aux = 0; i_aux < tam; i_aux++)
+    {
+        if (((vetor[i1] <= vetor[i2]) && (vetor[i1] <= vetor[i3]) && (i1 < tam_vetor_local)) ||
+                ((i2 == (tam_vetor_local + tam_vetor_esquera)) && (i3 == tam)))
+        {
+            vetor_auxiliar[i_aux] = vetor[i1++];
+        }
+        else
+        {
+            if (((vetor[i2] <= vetor[i3]) && (i2 < (tam_vetor_local + tam_vetor_esquera)))
+                || (i3 == tam))
+                vetor_auxiliar[i_aux] = vetor[i2++];
+            else
+                vetor_auxiliar[i_aux] = vetor[i3++];            
+        }
+    }
+    
+    delete[] vetor;
+
+	return vetor_auxiliar;
+}
 
 int main(int argc, char **argv)
 {
@@ -226,6 +269,7 @@ int main(int argc, char **argv)
             {
                 printf("BubbleSort\n");
             }
+            printf("Percentual ordenação local: %d%%\n", globalFlags::localSortRate);
             t1 = MPI_Wtime();        // contagem de tempo inicia neste ponto
         }
 
@@ -247,20 +291,63 @@ int main(int argc, char **argv)
         {
             // Dividir
             // quebrar em duas partes e mandar para os filhos
-            int *vetor_esquerda = &vetor[0];
-            int tam_vetor_esquerda = tam_vetor/2;
-            int *vetor_direita = &vetor[tam_vetor_esquerda];
-            int tam_vetor_direita = tam_vetor - tam_vetor_esquerda;
 
-            MPI_Send (vetor_esquerda, tam_vetor_esquerda, MPI_INT, processNode.leftChildRank, enmTagCommand__SendVector, MPI_COMM_WORLD);  // mando metade inicial do vetor
-            MPI_Send (vetor_direita, tam_vetor_direita, MPI_INT,processNode.rightChildRank, enmTagCommand__SendVector, MPI_COMM_WORLD);  // mando metade final
-        
-            // receber dos filhos
-            MPI_Recv(vetor_esquerda, tam_vetor_esquerda, MPI_INT, processNode.leftChildRank, enmTagCommand__SendVector, MPI_COMM_WORLD, &status_filhos);
-            MPI_Recv(vetor_direita, tam_vetor_direita, MPI_INT, processNode.rightChildRank, enmTagCommand__SendVector, MPI_COMM_WORLD, &status_filhos);        
+            if(globalFlags::localSortRate == 0)
+            {
+                //Não realiza ordenação local. Manda todo o trabalho para os filhos.
+                int *vetor_esquerda = &vetor[0];
+                int tam_vetor_esquerda = tam_vetor/2;
+                int *vetor_direita = &vetor[tam_vetor_esquerda];
+                int tam_vetor_direita = tam_vetor - tam_vetor_esquerda;
 
-            //Intercala os vetores recebidos
-            vetor = interleaving(vetor, tam_vetor, tam_vetor_esquerda);
+                MPI_Send (vetor_esquerda, tam_vetor_esquerda, MPI_INT, processNode.leftChildRank, enmTagCommand__SendVector, MPI_COMM_WORLD);  // mando metade inicial do vetor
+                MPI_Send (vetor_direita, tam_vetor_direita, MPI_INT,processNode.rightChildRank, enmTagCommand__SendVector, MPI_COMM_WORLD);  // mando metade final
+            
+                // receber dos filhos
+                MPI_Recv(vetor_esquerda, tam_vetor_esquerda, MPI_INT, processNode.leftChildRank, enmTagCommand__SendVector, MPI_COMM_WORLD, &status_filhos);
+                MPI_Recv(vetor_direita, tam_vetor_direita, MPI_INT, processNode.rightChildRank, enmTagCommand__SendVector, MPI_COMM_WORLD, &status_filhos);        
+
+                //Intercala os vetores recebidos
+                vetor = interleaving(vetor, tam_vetor, tam_vetor_esquerda);
+            }
+            else
+            {
+                //Ordenação local ativado. Pai separa parte do trabalho para ordenar e envia o restante para os filhos (mesma carga para ambos)
+
+                /*
+                *   **********************************************************
+                *   *Vetor_local*    Vetor_Esquerda    *    Vetor_Direita    *
+                *   **********************************************************
+                */
+
+                int *vetor_local = &vetor[0];
+                int tam_vetor_local = ((globalFlags::localSortRate / 100.0) * tam_vetor); //Regra de três
+                int *vetor_esquerda = &vetor[tam_vetor_local];
+                int tam_vetor_esquerda = (tam_vetor - tam_vetor_local)/2;
+                int *vetor_direita = &vetor[tam_vetor_local + tam_vetor_esquerda];
+                int tam_vetor_direita = tam_vetor - tam_vetor_local - tam_vetor_esquerda;                
+
+                MPI_Send (vetor_esquerda, tam_vetor_esquerda, MPI_INT, processNode.leftChildRank, enmTagCommand__SendVector, MPI_COMM_WORLD);  // mando metade inicial do vetor
+                MPI_Send (vetor_direita, tam_vetor_direita, MPI_INT,processNode.rightChildRank, enmTagCommand__SendVector, MPI_COMM_WORLD);  // mando metade final
+
+                //verifica se deve executar algorítmo bubble ou quick sort
+                if(globalFlags::quickSortSet)
+                {
+                    qsort(vetor_local, tam_vetor_local, sizeof(int), compare);
+                }
+                else
+                {
+                    bs(tam_vetor_local, vetor_local);
+                }
+            
+                // receber dos filhos
+                MPI_Recv(vetor_esquerda, tam_vetor_esquerda, MPI_INT, processNode.leftChildRank, enmTagCommand__SendVector, MPI_COMM_WORLD, &status_filhos);
+                MPI_Recv(vetor_direita, tam_vetor_direita, MPI_INT, processNode.rightChildRank, enmTagCommand__SendVector, MPI_COMM_WORLD, &status_filhos);        
+
+                //Intercala os vetores recebidos
+                vetor = interleaving(vetor, tam_vetor, tam_vetor_local, tam_vetor_esquerda);                
+            }
+
         }
 
         if ( my_rank != 0 )
