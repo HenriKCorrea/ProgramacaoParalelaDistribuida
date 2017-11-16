@@ -345,7 +345,8 @@ int main(int argc, char **argv)
                 MPI_Recv(vetor_direita, tam_vetor_direita, MPI_INT, processNode.rightChildRank, enmTagCommand__SendVector, MPI_COMM_WORLD, &status_filhos);        
 
                 //Intercala os vetores recebidos
-                vetor = interleaving(vetor, tam_vetor, tam_vetor_local, tam_vetor_esquerda);                
+                //vetor = interleaving(vetor, tam_vetor, tam_vetor_local, tam_vetor_esquerda);   
+                qsort(vetor, tam_vetor, sizeof(int), compare);
             }
 
         }
