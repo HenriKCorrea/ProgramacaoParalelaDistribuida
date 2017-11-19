@@ -49,7 +49,7 @@ public:
 
             if(myRank == 0)
             {
-                printf("Percentual buffer: %f\n", bufferSizePercent); 
+                printf("Percentual buffer: %.0f%%\n", bufferSizePercent * 100); 
             }
             
             //read optional args
@@ -112,9 +112,6 @@ int initializeVector(int **vector, int arraySize, int my_rank, int proc_n)
     for (int i = 0 ; i < tam_vetor_local; ++i)              /* init array with worst case for sorting */
         (*vector)[i] = offset_valor - i;
     
-    //DBG_VAR(my_rank);
-    //DBG_VECTOR((*vector), tam_vetor_local);
-    
     return tam_vetor_local;
 }
 
@@ -139,6 +136,18 @@ int main(int argc, char **argv)
     {
         int *vetor;                                                                              //pointer to data vector
         int tam_vetor = initializeVector(&vetor, globalFlags::arraySize, my_rank, proc_n); //Vector size may be different for each process
+
+        #ifdef DEBUG
+        for(int i = 0; i < proc_n; ++i)
+        {
+            MPI_Barrier(MPI_COMM_WORLD);
+            if(my_rank == i)
+            {
+                DBG_VAR(my_rank);
+                DBG_VECTOR(vetor, tam_vetor);
+            }
+        }
+        #endif        
         
         int i_max_valor = tam_vetor - 1;
         int proc_direita = my_rank + 1;
@@ -159,10 +168,10 @@ int main(int argc, char **argv)
         ///////////////////
         while(!pronto)
         {
-            static int contador(0);
 
         // ordeno vetor local
-            bs(tam_vetor, vetor); 
+            //bs(tam_vetor, vetor); 
+            qsort(vetor, tam_vetor, sizeof(int), compare);
 
         // verifico condição de parada
 
@@ -173,30 +182,22 @@ int main(int argc, char **argv)
             // se não for 0, recebo o maior elemento da esquerda
             if(my_rank != 0)
                 MPI_Recv(&buffer[0], 1, MPI_INT, proc_esquerda, enmTagCommand__SendVector, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-            // comparo se o meu menor elemento é maior do que o maior elemento recebido (se sim, estou ordenado em relação ao meu vizinho)
-            if(my_rank != 0)
-            {
-                if(vetor[0] > buffer[0])
-                {
-                    estado[my_rank] = 1;
-                }
-                else
-                {
-                    estado[my_rank] = 0;
-                }
-            }
             else
             {
-                //Sou o processo número zero
-                estado[my_rank] = 1;
+                //Sou o processo Zero
+                buffer[0] = vetor[0] - 1;
             }
+                
+            // comparo se o meu menor elemento é maior do que o maior elemento recebido (se sim, estou ordenado em relação ao meu vizinho)
+            if(vetor[0] > buffer[0])
+                estado[my_rank] = 1;
+            else
+                estado[my_rank] = 0;
             
             // compartilho o meu estado com todos os processos
             for(int i = 0; i < proc_n; ++i)
                 MPI_Bcast(&estado[i], 1, MPI_INT, i, MPI_COMM_WORLD);
 
-        
             // se todos estiverem ordenados com seus vizinhos, a ordenação do vetor global está pronta ( pronto = TRUE, break)
             pronto = true;
             for(int i = 0; i < proc_n; ++i)
@@ -223,7 +224,7 @@ int main(int argc, char **argv)
                 // ordeno estes valores com a parte mais alta do meu vetor local
                 static int offset = tam_vetor - tam_buffer; 
                 memcpy(&buffer[0], &vetor[offset], tam_buffer * sizeof(int));          //copia os maiores valres para a parte baixa do buffer
-                qsort(buffer, tam_buffer*2, sizeof(int), compare);       //ordena buffer de forma crescente
+                qsort(buffer, tam_buffer*2, sizeof(int), compare);                     //ordena buffer de forma crescente
                 memcpy(&vetor[offset], &buffer[0], tam_buffer * sizeof(int));          //copia os menores valores do buffer para os maiores valores do vetor
 
                 // devolvo os valores que recebi para a direita
@@ -233,45 +234,29 @@ int main(int argc, char **argv)
             // se não for o 0, recebo de volta os maiores valores da esquerda
             if(my_rank != 0)
                 MPI_Recv(&vetor[0], tam_buffer, MPI_INT, proc_esquerda, enmTagCommand__SendBuffer, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-
-
-        if(contador == 10)
-        {
-            if(my_rank == 0)
-            {
-                DBG_VAR(my_rank);
-                DBG_VECTOR(estado, proc_n);
-                //DBG_VECTOR(vetor, tam_vetor);         
-            }
-
-            while(1)
-            {
-                ;
-            }
-
         }
-        else
-            ++contador;
-
-
-
-        }
-
 
         if(my_rank == 0)
         {
             t2 = MPI_Wtime();                                       // contagem de tempo termina neste ponto
             printf("Tempo de execução do algoritmo: %f segundos\n", t2-t1);  // imprime tempo de execução
         }
-            
-        printf("FEITOOO!\n");
-        DBG_VAR(my_rank);
-        DBG_VECTOR(vetor, tam_vetor);
+
+        #ifdef DEBUG
+        for(int i = 0; i < proc_n; ++i)
+        {
+            MPI_Barrier(MPI_COMM_WORLD);
+            if(my_rank == i)
+            {
+                DBG_VAR(my_rank);
+                DBG_VECTOR(vetor, tam_vetor);
+            }
+        }
+        #endif
+
         delete[](vetor);
         delete[](buffer);
-
-
+        delete[](estado);
     }
 
     MPI_Barrier(MPI_COMM_WORLD); //Finish program only when all process close execution
