@@ -45,21 +45,22 @@ public:
             //Get mandatory arg (vector size and delta value) 
             arraySize = atoi(argv[1]);
             int tmpBufferSize = atoi(argv[2]);
-            bufferSizePercent = tmpBufferSize / 100.0;
-
-            if(myRank == 0)
+            if((tmpBufferSize >= 0) || (tmpBufferSize <= 100))
             {
-                printf("Percentual buffer: %.0f%%\n", bufferSizePercent * 100); 
+                bufferSizePercent = tmpBufferSize / 100.0;
+                if(myRank == 0)
+                {
+                    printf("Percentual buffer: %.0f%%\n", bufferSizePercent * 100); 
+                }
+            }   
+            else
+            {
+                result = false;
+                if(myRank == 0)
+                {
+                    fprintf(stderr, "Uso:\t%s <tamanho tarefa (vetor)> <buffer em %% enviado entre process em uma faixa de 0 ~ 100>\n", argv[0]); 
+                }
             }
-            
-            //read optional args
-            // for(int i = 3; i < argc; ++i)
-            // {
-            //     if(strcmp(argv[i], "-qsort") == 0)
-            //     {
-            //         quickSortSet = true;
-            //     }
-            // }
         }
         return result;
     }
@@ -170,8 +171,8 @@ int main(int argc, char **argv)
         {
 
         // ordeno vetor local
-            //bs(tam_vetor, vetor); 
-            qsort(vetor, tam_vetor, sizeof(int), compare);
+            bs(tam_vetor, vetor); 
+            //qsort(vetor, tam_vetor, sizeof(int), compare);
 
         // verifico condição de parada
 
