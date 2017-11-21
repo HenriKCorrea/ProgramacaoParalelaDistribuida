@@ -124,8 +124,6 @@ int main(int argc, char **argv)
     double t1, t2; //temporizadores para medir tempo de execução do algoritmo
 
 
-    
-
     MPI_Init(&argc , &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &proc_n);
@@ -185,7 +183,7 @@ int main(int argc, char **argv)
                 MPI_Recv(&buffer[0], 1, MPI_INT, proc_esquerda, enmTagCommand__SendVector, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             else
             {
-                //Sou o processo Zero
+                //Sou o processo Zero. Meu estado sempre será verdadeiro.
                 buffer[0] = vetor[0] - 1;
             }
                 
@@ -266,9 +264,8 @@ int main(int argc, char **argv)
     return 0;
 }
 
-
-            //t1 = MPI_Wtime();        // contagem de tempo inicia neste ponto
-
-            // t2 = MPI_Wtime();                                       // contagem de tempo termina neste ponto
-            // DBG_VECTOR(vetor, tam_vetor);                           // sou o raiz, mostro vetor
-            // printf("Tempo de execução do algoritmo: %f segundos\n", t2-t1);  // imprime tempo de execução
+//TODO:
+//O algoritmo de ordenação na etapa 1 e etapa 3 devem ser iguais
+//Fazer apenas grafico de barras do melhor tempo para comparar com TPP2
+//Implementar opção de quick sort e bubble sort
+//Fazer "gambiarra" no buffer
