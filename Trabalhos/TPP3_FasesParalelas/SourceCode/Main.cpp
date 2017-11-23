@@ -117,12 +117,13 @@ int compare (const void * a, const void * b)
 /*
 *   Populate root process array with the worst case for sorting  
 */
-int initializeVector(int **vector, int arraySize, int my_rank, int proc_n)
+int initializeVector(int **vector, int arraySize, int my_rank, int proc_n, double bufferSizePercent)
 {
     int tam_vetor_local = arraySize / proc_n;
     int offset_valor = (proc_n - my_rank) * tam_vetor_local;
+    int bufferSize = tam_vetor_local* bufferSizePercent;
     
-    *vector = new int[tam_vetor_local];
+    *vector = new int[tam_vetor_local + bufferSize];
     for (int i = 0 ; i < tam_vetor_local; ++i)              /* init array with worst case for sorting */
         (*vector)[i] = offset_valor - i;
     
@@ -147,7 +148,8 @@ int main(int argc, char **argv)
     if(isArgsValid)
     {
         int *vetor;                                                                              //pointer to data vector
-        int tam_vetor = initializeVector(&vetor, globalFlags::arraySize, my_rank, proc_n); //Vector size may be different for each process
+        int tam_vetor = initializeVector(&vetor, globalFlags::arraySize, my_rank, proc_n, globalFlags::bufferSizePercent); //Vector size may be different for each process
+        int tam_buffer = tam_vetor * globalFlags::bufferSizePercent;
 
         #ifdef DEBUG
         for(int i = 0; i < proc_n; ++i)
@@ -164,7 +166,6 @@ int main(int argc, char **argv)
         int i_max_valor = tam_vetor - 1;
         int proc_direita = my_rank + 1;
         int proc_esquerda = my_rank - 1;
-        int tam_buffer = tam_vetor * globalFlags::bufferSizePercent;
         int *buffer = new int[tam_buffer*2];
         int *estado = new int[proc_n];      //array usado para comparar o estado atual do processo com seu vizinho
         bool pronto(false);
@@ -233,20 +234,17 @@ int main(int argc, char **argv)
             // se não for np-1, recebo os menores valores da direita
             if(my_rank != (proc_n - 1))
             {
-                MPI_Recv(&buffer[tam_buffer], tam_buffer, MPI_INT, proc_direita, enmTagCommand__SendBuffer, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                MPI_Recv(&vetor[tam_vetor], tam_buffer, MPI_INT, proc_direita, enmTagCommand__SendBuffer, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
                 // ordeno estes valores com a parte mais alta do meu vetor local
                 static int offset = tam_vetor - tam_buffer; 
-                memcpy(&buffer[0], &vetor[offset], tam_buffer * sizeof(int));          //copia os maiores valres para a parte baixa do buffer
                 if(globalFlags::isQuickSortSet)                                         //ordena buffer de forma crescente
-                    qsort(buffer, tam_buffer*2, sizeof(int), compare);
+                    qsort(vetor, tam_vetor + tam_buffer, sizeof(int), compare);
                 else
-                    bs(tam_buffer*2, buffer);                 
-                //qsort(buffer, tam_buffer*2, sizeof(int), compare);                     
-                memcpy(&vetor[offset], &buffer[0], tam_buffer * sizeof(int));          //copia os menores valores do buffer para os maiores valores do vetor
+                    bs(tam_vetor + tam_buffer, vetor);                 
 
                 // devolvo os valores que recebi para a direita
-                MPI_Send(&buffer[tam_buffer], tam_buffer, MPI_INT, proc_direita, enmTagCommand__SendBuffer, MPI_COMM_WORLD);
+                MPI_Send(&vetor[tam_vetor], tam_buffer, MPI_INT, proc_direita, enmTagCommand__SendBuffer, MPI_COMM_WORLD);
             }
 
             // se não for o 0, recebo de volta os maiores valores da esquerda
