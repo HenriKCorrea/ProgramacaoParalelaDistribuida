@@ -26,6 +26,7 @@ class globalFlags{
 public:
     static int arraySize;
     static double bufferSizePercent;
+    static bool isQuickSortSet;
 
     static bool parseInputArgs(int argc, char **argv, int myRank)
     {
@@ -37,7 +38,7 @@ public:
             result = false;
             if(myRank == 0)
             {
-                fprintf(stderr, "Uso:\t%s <tamanho tarefa (vetor)> <buffer em %% enviado entre process em uma faixa de 0 ~ 100>\n", argv[0]); 
+                fprintf(stderr, "Uso:\t%s <tamanho tarefa (vetor)> <buffer em %% enviado entre process [0 ~ 100]> [-qsort]\n", argv[0]); 
             }
         }
         else
@@ -48,9 +49,20 @@ public:
             if((tmpBufferSize >= 0) || (tmpBufferSize <= 100))
             {
                 bufferSizePercent = tmpBufferSize / 100.0;
+                    for(int i = 3; i < argc; ++i)
+                    {
+                        if(strcmp(argv[i], "-qsort") == 0)
+                            isQuickSortSet = true;
+                    }
+
                 if(myRank == 0)
                 {
-                    printf("Percentual buffer: %.0f%%\n", bufferSizePercent * 100); 
+                    printf("Percentual buffer: %.0f%%\n", bufferSizePercent * 100);
+                    printf("Algoritmo de ordenação selecionado: ");
+                    if(isQuickSortSet)
+                        printf("Quick Sort\n");
+                    else
+                        printf("Bubble Sort\n");       
                 }
             }   
             else
@@ -58,7 +70,7 @@ public:
                 result = false;
                 if(myRank == 0)
                 {
-                    fprintf(stderr, "Uso:\t%s <tamanho tarefa (vetor)> <buffer em %% enviado entre process em uma faixa de 0 ~ 100>\n", argv[0]); 
+                    fprintf(stderr, "Uso:\t%s <tamanho tarefa (vetor)> <buffer em %% enviado entre process [0 ~ 100] [-qsort]>\n", argv[0]); 
                 }
             }
         }
@@ -68,6 +80,7 @@ public:
 //Global flags members initialization
 int globalFlags::arraySize = 0;
 double globalFlags::bufferSizePercent = 0.0;
+bool globalFlags::isQuickSortSet = false;
 ///////////
 
 /*
@@ -169,8 +182,10 @@ int main(int argc, char **argv)
         {
 
         // ordeno vetor local
-            bs(tam_vetor, vetor); 
-            //qsort(vetor, tam_vetor, sizeof(int), compare);
+            if(globalFlags::isQuickSortSet)
+                qsort(vetor, tam_vetor, sizeof(int), compare);
+            else
+                bs(tam_vetor, vetor); 
 
         // verifico condição de parada
 
@@ -223,7 +238,11 @@ int main(int argc, char **argv)
                 // ordeno estes valores com a parte mais alta do meu vetor local
                 static int offset = tam_vetor - tam_buffer; 
                 memcpy(&buffer[0], &vetor[offset], tam_buffer * sizeof(int));          //copia os maiores valres para a parte baixa do buffer
-                qsort(buffer, tam_buffer*2, sizeof(int), compare);                     //ordena buffer de forma crescente
+                if(globalFlags::isQuickSortSet)                                         //ordena buffer de forma crescente
+                    qsort(buffer, tam_buffer*2, sizeof(int), compare);
+                else
+                    bs(tam_buffer*2, buffer);                 
+                //qsort(buffer, tam_buffer*2, sizeof(int), compare);                     
                 memcpy(&vetor[offset], &buffer[0], tam_buffer * sizeof(int));          //copia os menores valores do buffer para os maiores valores do vetor
 
                 // devolvo os valores que recebi para a direita
@@ -265,7 +284,5 @@ int main(int argc, char **argv)
 }
 
 //TODO:
-//O algoritmo de ordenação na etapa 1 e etapa 3 devem ser iguais
 //Fazer apenas grafico de barras do melhor tempo para comparar com TPP2
-//Implementar opção de quick sort e bubble sort
 //Fazer "gambiarra" no buffer

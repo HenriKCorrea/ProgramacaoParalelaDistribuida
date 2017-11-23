@@ -27,8 +27,8 @@ endif
 # Project flags - TPP2 Mestre Escravo
 #
 NUMBER_OF_PROCESS := 2
-VECTOR_SIZE := 1000000
-BUFFER_SIZE_PERCENT := 50
+VECTOR_SIZE := 100
+BUFFER_SIZE_PERCENT := 10
 
 #
 # Release build settings
