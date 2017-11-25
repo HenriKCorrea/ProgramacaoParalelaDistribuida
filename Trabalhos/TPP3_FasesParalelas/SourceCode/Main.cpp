@@ -175,83 +175,99 @@ int main(int argc, char **argv)
         {
             t1 = MPI_Wtime();        // contagem de tempo inicia neste ponto
         }
-
-        ////////////////////
-        // Inicia algorítmo
-        ///////////////////
-        while(!pronto)
+        if(proc_n == 1)
         {
+            /////////////
+            // Standalone run
+            /////////////
 
-        // ordeno vetor local
+            // ordeno vetor local
             if(globalFlags::isQuickSortSet)
                 qsort(vetor, tam_vetor, sizeof(int), compare);
             else
-                bs(tam_vetor, vetor); 
+                bs(tam_vetor, vetor);             
 
-        // verifico condição de parada
-
-            // se não for np-1, mando o meu maior elemento para a direita
-            if(my_rank != (proc_n - 1))
-                MPI_Send(&vetor[i_max_valor], 1, MPI_INT, proc_direita, enmTagCommand__SendVector, MPI_COMM_WORLD);
-        
-            // se não for 0, recebo o maior elemento da esquerda
-            if(my_rank != 0)
-                MPI_Recv(&element_state_verify, 1, MPI_INT, proc_esquerda, enmTagCommand__SendVector, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            else
-            {
-                //Sou o processo Zero. Meu estado sempre será verdadeiro.
-                element_state_verify = vetor[0] - 1;
-            }
-                
-            // comparo se o meu menor elemento é maior do que o maior elemento recebido (se sim, estou ordenado em relação ao meu vizinho)
-            if(vetor[0] > element_state_verify)
-                estado[my_rank] = 1;
-            else
-                estado[my_rank] = 0;
-            
-            // compartilho o meu estado com todos os processos
-            for(int i = 0; i < proc_n; ++i)
-                MPI_Bcast(&estado[i], 1, MPI_INT, i, MPI_COMM_WORLD);
-
-            // se todos estiverem ordenados com seus vizinhos, a ordenação do vetor global está pronta ( pronto = TRUE, break)
-            pronto = true;
-            for(int i = 0; i < proc_n; ++i)
-                pronto &= estado[i];            //Se existir pelo menos um estado com valor zero, pronto = FALSE
-            
-            if(pronto)
-                break;
-
-            // senão continuo
-
-        // troco valores para convergir
-
-            // se não for o 0, mando os menores valores do meu vetor para a esquerda
-            if(my_rank != 0)
-                MPI_Send(&vetor[0], tam_buffer, MPI_INT, proc_esquerda, enmTagCommand__SendBuffer, MPI_COMM_WORLD);
-
-
-
-            // se não for np-1, recebo os menores valores da direita
-            if(my_rank != (proc_n - 1))
-            {
-                MPI_Recv(&vetor[tam_vetor], tam_buffer, MPI_INT, proc_direita, enmTagCommand__SendBuffer, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-                // ordeno estes valores com a parte mais alta do meu vetor local
-                static int offset = tam_vetor - tam_buffer;
-                static int buffer_size_2 = tam_buffer * 2; 
-                if(globalFlags::isQuickSortSet)                                         //ordena buffer de forma crescente
-                    qsort(&vetor[offset], buffer_size_2, sizeof(int), compare);
-                else
-                    bs(buffer_size_2, &vetor[offset]);                 
-
-                // devolvo os valores que recebi para a direita
-                MPI_Send(&vetor[tam_vetor], tam_buffer, MPI_INT, proc_direita, enmTagCommand__SendBuffer, MPI_COMM_WORLD);
-            }
-
-            // se não for o 0, recebo de volta os maiores valores da esquerda
-            if(my_rank != 0)
-                MPI_Recv(&vetor[0], tam_buffer, MPI_INT, proc_esquerda, enmTagCommand__SendBuffer, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         }
+        else
+        {
+            ////////////////////
+            // Inicia algorítmo
+            ///////////////////
+            while(!pronto)
+            {
+
+            // ordeno vetor local
+                if(globalFlags::isQuickSortSet)
+                    qsort(vetor, tam_vetor, sizeof(int), compare);
+                else
+                    bs(tam_vetor, vetor); 
+
+            // verifico condição de parada
+
+                // se não for np-1, mando o meu maior elemento para a direita
+                if(my_rank != (proc_n - 1))
+                    MPI_Send(&vetor[i_max_valor], 1, MPI_INT, proc_direita, enmTagCommand__SendVector, MPI_COMM_WORLD);
+            
+                // se não for 0, recebo o maior elemento da esquerda
+                if(my_rank != 0)
+                    MPI_Recv(&element_state_verify, 1, MPI_INT, proc_esquerda, enmTagCommand__SendVector, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                else
+                {
+                    //Sou o processo Zero. Meu estado sempre será verdadeiro.
+                    element_state_verify = vetor[0] - 1;
+                }
+                    
+                // comparo se o meu menor elemento é maior do que o maior elemento recebido (se sim, estou ordenado em relação ao meu vizinho)
+                if(vetor[0] > element_state_verify)
+                    estado[my_rank] = 1;
+                else
+                    estado[my_rank] = 0;
+                
+                // compartilho o meu estado com todos os processos
+                for(int i = 0; i < proc_n; ++i)
+                    MPI_Bcast(&estado[i], 1, MPI_INT, i, MPI_COMM_WORLD);
+
+                // se todos estiverem ordenados com seus vizinhos, a ordenação do vetor global está pronta ( pronto = TRUE, break)
+                pronto = true;
+                for(int i = 0; i < proc_n; ++i)
+                    pronto &= estado[i];            //Se existir pelo menos um estado com valor zero, pronto = FALSE
+                
+                if(pronto)
+                    break;
+
+                // senão continuo
+
+            // troco valores para convergir
+
+                // se não for o 0, mando os menores valores do meu vetor para a esquerda
+                if(my_rank != 0)
+                    MPI_Send(&vetor[0], tam_buffer, MPI_INT, proc_esquerda, enmTagCommand__SendBuffer, MPI_COMM_WORLD);
+
+
+
+                // se não for np-1, recebo os menores valores da direita
+                if(my_rank != (proc_n - 1))
+                {
+                    MPI_Recv(&vetor[tam_vetor], tam_buffer, MPI_INT, proc_direita, enmTagCommand__SendBuffer, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+                    // ordeno estes valores com a parte mais alta do meu vetor local
+                    static int offset = tam_vetor - tam_buffer;
+                    static int buffer_size_2 = tam_buffer * 2; 
+                    if(globalFlags::isQuickSortSet)                                         //ordena buffer de forma crescente
+                        qsort(&vetor[offset], buffer_size_2, sizeof(int), compare);
+                    else
+                        bs(buffer_size_2, &vetor[offset]);                 
+
+                    // devolvo os valores que recebi para a direita
+                    MPI_Send(&vetor[tam_vetor], tam_buffer, MPI_INT, proc_direita, enmTagCommand__SendBuffer, MPI_COMM_WORLD);
+                }
+
+                // se não for o 0, recebo de volta os maiores valores da esquerda
+                if(my_rank != 0)
+                    MPI_Recv(&vetor[0], tam_buffer, MPI_INT, proc_esquerda, enmTagCommand__SendBuffer, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            }
+        }
+
 
         if(my_rank == 0)
         {
