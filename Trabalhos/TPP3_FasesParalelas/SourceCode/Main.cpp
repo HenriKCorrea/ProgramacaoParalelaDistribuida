@@ -166,7 +166,7 @@ int main(int argc, char **argv)
         int i_max_valor = tam_vetor - 1;
         int proc_direita = my_rank + 1;
         int proc_esquerda = my_rank - 1;
-        int *buffer = new int[tam_buffer*2];
+        int element_state_verify;
         int *estado = new int[proc_n];      //array usado para comparar o estado atual do processo com seu vizinho
         bool pronto(false);
 
@@ -196,15 +196,15 @@ int main(int argc, char **argv)
         
             // se não for 0, recebo o maior elemento da esquerda
             if(my_rank != 0)
-                MPI_Recv(&buffer[0], 1, MPI_INT, proc_esquerda, enmTagCommand__SendVector, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                MPI_Recv(&element_state_verify, 1, MPI_INT, proc_esquerda, enmTagCommand__SendVector, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             else
             {
                 //Sou o processo Zero. Meu estado sempre será verdadeiro.
-                buffer[0] = vetor[0] - 1;
+                element_state_verify = vetor[0] - 1;
             }
                 
             // comparo se o meu menor elemento é maior do que o maior elemento recebido (se sim, estou ordenado em relação ao meu vizinho)
-            if(vetor[0] > buffer[0])
+            if(vetor[0] > element_state_verify)
                 estado[my_rank] = 1;
             else
                 estado[my_rank] = 0;
@@ -272,7 +272,6 @@ int main(int argc, char **argv)
         #endif
 
         delete[](vetor);
-        delete[](buffer);
         delete[](estado);
     }
 
