@@ -237,11 +237,12 @@ int main(int argc, char **argv)
                 MPI_Recv(&vetor[tam_vetor], tam_buffer, MPI_INT, proc_direita, enmTagCommand__SendBuffer, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
                 // ordeno estes valores com a parte mais alta do meu vetor local
-                static int offset = tam_vetor - tam_buffer; 
+                static int offset = tam_vetor - tam_buffer;
+                static int buffer_size_2 = tam_buffer * 2; 
                 if(globalFlags::isQuickSortSet)                                         //ordena buffer de forma crescente
-                    qsort(vetor, tam_vetor + tam_buffer, sizeof(int), compare);
+                    qsort(&vetor[offset], buffer_size_2, sizeof(int), compare);
                 else
-                    bs(tam_vetor + tam_buffer, vetor);                 
+                    bs(buffer_size_2, &vetor[offset]);                 
 
                 // devolvo os valores que recebi para a direita
                 MPI_Send(&vetor[tam_vetor], tam_buffer, MPI_INT, proc_direita, enmTagCommand__SendBuffer, MPI_COMM_WORLD);
@@ -280,7 +281,3 @@ int main(int argc, char **argv)
 
     return 0;
 }
-
-//TODO:
-//Fazer apenas grafico de barras do melhor tempo para comparar com TPP2
-//Fazer "gambiarra" no buffer
